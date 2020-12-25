@@ -11,6 +11,11 @@ p2 db 15,?,30 dup ('$') ; player 2 name
                         ;WHEN WE PRINT PLAYER NAMES, N2OOL EL OFFSET BTA3HOM PLUS 2
 
 
+time dw ?  ;for bullet to travel
+min db ?
+x dw 10    ;bullet starting pos
+y dw 100
+
 .code
 main proc far
 
@@ -142,5 +147,60 @@ typeNamePtwo proc ; moves the cursor to the below middle of the screen and takes
     ret
 typeNamePtwo endp
 
+bullet proc
+
+    mov ah,0
+mov al,13h
+int 10h
+
+mov al,15 ;draw pixel initially
+mov cx, x
+mov dx, y
+mov ah,0ch;
+int 10h
+
+mov ah,2ch ; 
+int 21h
+add dx,5
+mov time,dx
+mov min,cl
+
+BulletL:
+mov ah,2ch
+int 21h
+
+cmp cl,min ;when a minute passes reset time
+jz ignore
+mov time,0h
+inc min
+ignore:
+
+cmp dx, time
+jb BulletL ;draw with time
+
+mov al,0
+mov cx, x
+mov dx, y
+mov ah,0ch
+int 10h
+add x,4 ;increase to increase speed
+mov al,15
+mov cx, x
+mov dx, y
+mov ah,0ch
+int 10h
+
+mov ah,2ch
+int 21h
+add dx,5
+mov time,dx
+
+mov cx,x
+cmp cx,200 ;where to the bullet stops
+jbe BulletL
+
+ret
+
+bullet endp
 
 end main
