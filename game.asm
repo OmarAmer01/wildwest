@@ -16,6 +16,29 @@ min db ?
 x dw 10    ;bullet starting pos
 y dw 100
 
+Prompt db "press ","$ " ; for shield
+P1key db ?
+P2key db ?
+P1HasSheild db 0d
+P2HasSheild db 0d
+
+P1HasSheildPrompt db "Player 1 has shield ","$ "
+P2HasSheildPrompt db "Player 2 has shield ","$ "
+
+ArrowsSC db 48h,4Bh,50h,4dh 
+wasdSC   db 77h,61h,73h,64h
+
+left  db  "left arrow ","$ "
+right db  "right arrow ","$ "
+up    db  "up arrow ","$ "
+down  db  "down arrow ","$ "
+
+w  db  "w key ","$ "
+a  db  "a key ","$ "
+s  db  "s key ","$ "
+d  db  "d key ","$ " ;shield end
+
+
 .code
 main proc far
 
