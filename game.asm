@@ -28,15 +28,15 @@ P2HasSheildPrompt db "Player 2 has shield ","$ "
 ArrowsSC db 48h,4Bh,50h,4dh 
 wasdSC   db 77h,61h,73h,64h
 
-left  db  "left arrow ","$ "
-right db  "right arrow ","$ "
-up    db  "up arrow ","$ "
-down  db  "down arrow ","$ "
+left  db  17,"$ "
+right db  16,"$ "
+up    db  24,"$ "
+down  db  25,"$ "
 
-w  db  "w key ","$ "
-a  db  "a key ","$ "
-s  db  "s key ","$ "
-d  db  "d key ","$ " ;shield end
+w  db  "w ","$ "
+a  db  "a ","$ "
+s  db  "s ","$ "
+d  db  "d ","$ ";shield end
 
 
 .code
