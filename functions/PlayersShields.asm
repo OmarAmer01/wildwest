@@ -13,7 +13,7 @@ YptwoPosition DW 300 ;Player Two Y_Position
 
 ;put the img data outputed by python script here:
 ;--------------------------------- Player One --------------------------------------------
-img DB 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 
+p1ShieldHolster DB 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 
  DB 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 
  DB 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 
  DB 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 
@@ -190,7 +190,7 @@ img DB 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 ;--------------------------------------------------------------------------------
 
 ;------------------------------------Player Two ---------------------------------
-imgTwo DB 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 
+p2ShieldHolster DB 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 
  DB 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 
  DB 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 
  DB 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 22, 23, 0, 0, 0, 0 
@@ -373,8 +373,8 @@ MAIN PROC FAR
 	mov bx, 0100h	
 	INT 10h      	;execute the configuration
 ;--------- if these configurations executed twice else where in the code all previous drawings will be lost ------;
-    call DrawPlayerOne    
-    call DrawPlayerTwo    
+    call p1ShieldLow    
+    call p2ShieldLow    
    
 MAIN ENDP	
 
@@ -397,7 +397,7 @@ Cursor PROC
         RET
 Cursor endp
 
-DrawPlayerOne PROC 
+p1ShieldLow PROC 
 	       ;mov ax, 4F02h    ;
 	       ;mov bx, 0100h    ; 640x400 screen graphics mode
 	       ;INT 10h      	;execute the configuration
@@ -406,7 +406,7 @@ DrawPlayerOne PROC
 	       ADD CX, imgW  	;set the width (X) up to 64 (based on image resolution)
 	       MOV DX, Yposition 	;set the hieght (Y) up to 64 (based on image resolution)
 	       ADD DX, imgH 	;set the hieght (Y) up to 64 (based on image resolution)
-		   mov DI, offset img  ; to iterate over the pixels
+		   mov DI, offset p1ShieldHolster  ; to iterate over the pixels
 	       jmp Start    	;Avoid drawing before the calculations
 	Drawit:
 	       MOV AH,0Ch   	;set the configuration to writing a pixel
@@ -426,9 +426,9 @@ DrawPlayerOne PROC
 
 	ENDING:
 	RET
-DrawPlayerOne ENDP
+p1ShieldLow ENDP
 
-DrawPlayerTwo PROC 
+p2ShieldLow PROC 
 	       ;mov ax, 4F02h    ;
 	       ;mov bx, 0100h    ; 640x400 screen graphics mode
 	       ;INT 10h      	;execute the configuration
@@ -437,7 +437,7 @@ DrawPlayerTwo PROC
 	       ADD CX, imgW  	;set the width (X) up to 64 (based on image resolution)
 	       MOV DX, YptwoPosition 	;set the hieght (Y) up to 64 (based on image resolution)
 	       ADD DX, imgH 	;set the hieght (Y) up to 64 (based on image resolution)
-		   mov DI, offset imgTwo  ; to iterate over the pixels
+		   mov DI, offset p2ShieldHolster  ; to iterate over the pixels
 	       jmp StartTwo    	;Avoid drawing before the calculations
 	DrawitTwo:
 	       MOV AH,0Ch   	;set the configuration to writing a pixel
@@ -457,7 +457,7 @@ DrawPlayerTwo PROC
 
 	ENDINGTwo:
     RET
-DrawPlayerTwo ENDP
+p2ShieldLow ENDP
 
 end main 
 
