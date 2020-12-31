@@ -4,6 +4,7 @@
 .stack 64
 .data
 newLine db 13,10 , '$' ;for debugging purposes
+clearLine db 15 dup (' ') ,13,10,'$'
 enterPoneName db "Enter Player One Name:" , 13,10 ,'$' ; messages to enter name
 enterPtwoName db "Enter Player Two Name:" , 13,10 ,'$' ; messages to enter name
 p1 db 15,?,30 dup ('$') ; player 1 name
@@ -16,6 +17,13 @@ time dw ?  ;for bullet to travel
 min db ?
 x dw 10    ;bullet starting pos
 y dw 100
+
+
+
+currSysTime db ?
+minResetCalc db ?
+
+waitTime db 3h   
 
 Prompt db "press ","$ " ; for shield
 P1key db ?
@@ -38,6 +46,8 @@ p1GunUp db "P1 Gun Up",13,10,'$'
 p1Shot db "P1 Shot.",13,10,'$'
 p2Shot db "P2 Shot.",13,10,'$'
 
+p1Foul db "Foul! P1 Raised Before timer",13,10,'$'
+p2Foul db "Foul! p2 Raised before timer",13,10,'$'
 
 bothDown db "BOTH GUNS DOWN",13,10,'$'
 bothUP db "BOTH GUNS UP",13,10,'$'
@@ -45,6 +55,8 @@ bothUP db "BOTH GUNS UP",13,10,'$'
 p2GunDown db "P2 Gun Down",13,10,'$'
 p2GunUp db "P2 Gun Up",13,10,'$'
 
+stayHolstered db "Keep your guns holstered until timer",13,10,'$'
+startGame db "Start The Game Now!!!!!!!!" ,13,10,'$'
 
 ;----------------Controls------------------------
 
@@ -820,20 +832,16 @@ call typeNamePtwo
 	INT 10h      	;To Graphics Mode
 
 
-;------------------Main Loop Of the Program and heart of the game--------------------
+;------------------------------------Start Ready Check--------------------------------
 
-;main_loop:
-
-;mov ah,9
-;lea dx,mbPrompt     ;Telling players to get ready
-;int 21h
+mov ah,9
+lea dx,stayHolstered     ;Telling players to get ready
+int 21h
 
 readyCheck:         ; loop to make sure players have their guns
                     ; holesterd at the start of the round 
 
-;mov ah,9
-;lea dx,mbPrompt     ;Telling players to get ready
-;int 21h  
+
 call drawP1Raised
 call drawP2Raised     
 
@@ -845,7 +853,7 @@ je oneReady
 cmp bx,2            ; if RMB Pressed, then p2 is ready but p1 isnt
 je twoReady
 cmp bx,3            ; if both RMB & LMB are down then both players are ready
-je logic
+je breakloop
 jne readyCheck      ; if no buttons were pressed, repeat the ready check
 
 
@@ -863,7 +871,7 @@ cmp bx,0                ; IF NO ONE IS READY
 je readyCheck
 
 cmp bx,3                ; IF BOTH BUTTONS PRESSED
-je logic                ; START THE ROUND
+je breakloop                ; START THE ROUND
 jne oneReady
 
 
@@ -883,12 +891,75 @@ cmp bx,0
 je readyCheck
 
 cmp bx,3
-je logic
+je breakloop
 jne twoReady
 
-mov ah,8
-int 21h ;andrew said it clears buffer
+breakloop:
 
+
+;------------------------Ready Check Complete---------------------------------------
+
+; n4of el time awl man5osh el foul check w b3d man5alas el check n4of el time tany, lw el wa2t 3ada mn 8er 
+;ma ay player yrf3 el sela7 n5osh fel l3ba, 8er keda foul.
+
+mov ah,2ch
+int 21h    			;Get System time and put the seconds in memory variable
+
+mov minResetCalc,cl
+
+
+
+mov currSysTime,dh
+
+mov al,dh
+mov ch,7
+;div ch
+
+mov waitTime, ah
+
+foulCheck:
+
+
+
+call drawP1Holstered
+call drawP2Holstered
+
+mov ax,3
+int 33h 		; get mouse button status
+
+cmp bx,1
+je foulP2		;lw 7d 3amal foul n2ool
+
+cmp bx,2
+je foulP1		;lw 7d 3amal foul n2ool
+
+mov ah,2ch
+int 21h    	; nbos 3la el sa3a
+
+cmp cl,minResetCalc ;when a minute passes reset time
+jz ignore3
+mov currSysTime,0h
+inc minResetCalc
+ignore3:
+
+
+SUB dh,currSysTime		
+
+cmp dh,3			; lw el far2 mabenhom aktr mn waitTime 
+						; break el loop
+						; howa 3mro ma hy break el loop ela
+						; lw m7d4 3amal foul
+jne foulCheck
+
+
+
+mov ah,9
+lea dx,startGame
+int 21h
+
+
+
+;----------------------------Foul Check Complete-----------------------------------
 
 logic: ;the main game
 
@@ -936,7 +1007,7 @@ p1Down:     ; while LMB is pressed keep displaying
 
 		    ; this means only player 2 can fire his pistol
 call drawP1Holstered
-
+call drawP2Raised
 ;call clearkeyboardbuffer
 
 mov ah,1
@@ -969,6 +1040,7 @@ p2Down:     ; while RMB is pressed keep displaying
 			;this means that only player 1 can fire his pistol
 call drawP2Holstered
 ;call clearkeyboardbuffer
+call drawP1Raised
 
 
 mov ah,1
@@ -1539,5 +1611,31 @@ int 21h
 
 ret
 simulateP2Shot endp
+
+foulP1 proc 
+
+call drawP1Raised
+call drawP2Holstered
+
+mov ah,9
+lea dx,p1Foul
+int 21h
+
+ret
+
+foulP1 endp
+
+foulP2 proc 
+
+call drawP2Raised
+call drawP1Holstered
+
+mov ah,9
+lea dx,p2Foul
+int 21h
+
+ret
+
+foulP2 endp
 
 end main
