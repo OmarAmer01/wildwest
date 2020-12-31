@@ -16,8 +16,10 @@ Yposition DW 285 ;Player One Y_Position
 XptwoPosition DW 500 ;Player Two X_Position
 YptwoPosition DW 285 ;Player Two Y_Position
 
-bulletOneXPosition DW 145 ;Bullet One X_Position
-bulletOneYPosition DW 316 ;Bullet One Y_Position
+bulletOneXPosition DW 145  ;Bullet One X_Position
+bulletOneYPosition equ 316 ;Bullet One Y_Position
+
+reset DW ?
 
 clearbulletone DB 0       ;Set to one to draw a bullet with the background color 
 ;put the img data outputed by python script here:
@@ -706,17 +708,18 @@ MAIN PROC FAR
 	INT 10h      	;execute the configuration
 ;--------- if these configurations executed twice else where in the code all previous drawings will be lost ------; 
     call DrawPlayerOne
+    call DrawPlayerTwo
+    
+	;--------- Wait for testing ----------
+	testing:mov ah, 07h   ;Input from keyboard without echo to the screen
+	int 21h
     call ShootPlayerTwo
-    ;call DrawPlayerOneBullet
-	;--------- Wait ----------
-	mov ah, 07h   ;Input from keyboard without echo to the screen
-	int 21h
-	mov ax, 4C00h ;Terminate
-	int 21h
-   
+    jmp testing
 MAIN ENDP	
 ;-------- Player will shoot player two --------;
 ShootPlayerTwo PROC
+    mov bx,bulletOneXPosition    ;save the original value after shootting 
+    mov reset,bx
     movebullet:
         Call DrawPlayerOneBullet
         ;Delay
@@ -728,6 +731,9 @@ ShootPlayerTwo PROC
         ADD bulletOneXPosition,10        
         CMP bulletOneXPosition,455
         JNZ movebullet      	   
+        ;---------Reset the start position-----
+        mov bx,reset
+        mov bulletOneXPosition,bx
     RET
 ShootPlayerTwo ENDP   
 DrawPlayerOneBullet PROC 
@@ -797,5 +803,37 @@ DrawPlayerOne PROC
 	ENDING:
 	RET
 DrawPlayerOne ENDP
+
+DrawPlayerTwo PROC 
+	       ;mov ax, 4F02h    ;
+	       ;mov bx, 0100h    ; 640x400 screen graphics mode
+	       ;INT 10h      	;execute the configuration
+	       MOV AH,0Bh   	;set the configuration
+	       MOV CX, XptwoPosition  	;set the start drawing point 
+	       ADD CX, imgW2  	;set the width (X) up to 64 (based on image resolution)
+	       MOV DX, YptwoPosition 	;set the hieght (Y) up to 64 (based on image resolution)
+	       ADD DX, imgH 	;set the hieght (Y) up to 64 (based on image resolution)
+		   mov DI, offset imgTwo  ; to iterate over the pixels
+	       jmp StartTwo    	;Avoid drawing before the calculations
+	DrawitTwo:
+	       MOV AH,0Ch   	;set the configuration to writing a pixel
+           mov al, [DI]     ; color of the current coordinates
+	       MOV BH,00h   	;set the page number
+	       INT 10h      	;execute the configuration
+	StartTwo: 
+		   inc DI
+	       DEC Cx       	;  loop iteration in x direction
+	       cmp Cx,XptwoPosition         ;JNZ Drawit      	;  check if we can draw c urrent x and y and excape the y iteration
+	       JNZ DrawitTwo
+           ADD Cx, imgW2 	;  if loop iteration in y direction, then x should start over so that we sweep the grid
+	       DEC DX       	;  loop iteration in y direction
+	       cmp DX,YptwoPosition
+	       JZ  ENDINGTwo   	;  both x and y reached 00 so end program
+		   Jmp DrawitTwo
+
+	ENDINGTwo:
+    RET
+DrawPlayerTwo ENDP
+
 
 end main 
