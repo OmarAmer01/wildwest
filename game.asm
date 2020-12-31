@@ -3,6 +3,37 @@
 .386
 .stack 64
 .data
+
+;------------------------
+
+bulletimgW equ 39
+bulletimgH equ 20
+
+imgWBullet equ 120
+imgHBullet equ 119
+
+imgW2 equ 99
+
+Xposition DW 30  ;Player One X_Position
+Yposition DW 285 ;Player One Y_Position
+
+XptwoPosition DW 500 ;Player Two X_Position
+YptwoPosition DW 285 ;Player Two Y_Position
+
+bulletOneXPosition DW 145  ;Bullet One X_Position
+bulletOneYPosition equ 316 ;Bullet One Y_Position
+
+bulletTwoXPosition DW 470
+
+reset DW ?  
+
+bgrndcolor db 0           ;Set background color for images  
+
+clearbulletone DB 0   
+;-----------------------
+
+
+
 newLine db 13,10 , '$' ;for debugging purposes
 clearLine db 15 dup (' ') ,13,10,'$'
 enterPoneName db "Enter Player One Name:" , 13,10 ,'$' ; messages to enter name
@@ -80,11 +111,11 @@ d  db  "d ","$ ";shield end
 imgW equ 68
 imgH equ 102
 
-Xposition DW 50  ;Player One X_Position
-Yposition DW 300 ;Player One Y_Position
+XpositionOne DW 50  ;Player One X_Position
+YpositionOne DW 300 ;Player One Y_Position
 
-XptwoPosition DW 550 ;Player Two X_Position
-YptwoPosition DW 300 ;Player Two Y_Position
+XptwoPositionTwo DW 550 ;Player Two X_Position
+YptwoPositionTwo DW 300 ;Player Two Y_Position
 
 ;--------------------------------- Player One --------------------------------------------
 p1Raised DB 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 
@@ -787,6 +818,48 @@ p2Holstered DB 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
  DB 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 
  DB 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 
  DB 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+
+ bulletimg DB 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 
+ DB 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 
+ DB 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 
+ DB 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 
+ DB 0, 0, 0, 0, 0, 116, 116, 116, 116, 116, 6, 6, 6, 6, 6, 6, 6, 6, 6, 116, 6, 43, 6, 116, 6, 6, 6, 6, 116, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 
+ DB 0, 0, 0, 0, 116, 116, 116, 116, 116, 6, 6, 6, 6, 6, 6, 6, 6, 6, 116, 6, 43, 6, 116, 6, 6, 6, 6, 116, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 116 
+ DB 116, 116, 116, 116, 116, 116, 116, 116, 6, 6, 6, 6, 6, 6, 6, 6, 6, 116, 6, 43, 6, 116, 6, 6, 6, 6, 116, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 116, 116 
+ DB 116, 116, 116, 116, 116, 116, 116, 6, 6, 6, 6, 6, 6, 6, 6, 6, 116, 6, 43, 6, 116, 6, 6, 6, 6, 116, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 116, 116, 116 
+ DB 116, 116, 116, 116, 116, 116, 6, 6, 6, 6, 6, 6, 6, 6, 6, 116, 6, 43, 6, 116, 6, 6, 6, 6, 116, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 116, 116, 116, 116 
+ DB 116, 116, 116, 116, 116, 6, 6, 6, 6, 6, 6, 6, 6, 6, 116, 6, 43, 6, 116, 6, 6, 6, 6, 116, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 116, 116, 116, 116, 116 
+ DB 116, 116, 116, 116, 6, 6, 6, 6, 6, 6, 6, 6, 6, 116, 6, 43, 6, 116, 6, 6, 6, 6, 116, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 116, 116, 116, 116, 116, 116 
+ DB 116, 116, 116, 6, 6, 6, 6, 6, 6, 6, 6, 6, 116, 6, 43, 6, 116, 6, 6, 6, 6, 116, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 116, 116, 116, 116, 116, 116, 116 
+ DB 116, 116, 6, 6, 6, 6, 6, 6, 6, 6, 6, 116, 6, 43, 6, 116, 6, 6, 6, 6, 116, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 116, 116, 116, 116, 116, 116, 116, 116 
+ DB 116, 6, 6, 6, 6, 6, 6, 6, 6, 6, 116, 6, 43, 6, 116, 6, 6, 6, 6, 116, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 116, 116, 116, 116, 116 
+ DB 6, 6, 6, 6, 6, 6, 6, 6, 6, 116, 6, 43, 6, 116, 6, 6, 6, 6, 116, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 116, 116, 116, 116, 116, 6 
+ DB 6, 6, 6, 6, 6, 6, 6, 6, 116, 6, 43, 6, 116, 6, 6, 6, 6, 116, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 
+ DB 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 
+ DB 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 
+ DB 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 
+ DB 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+ ;-----------------------------------------------------------------
+ bulletimg2 DB 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 
+ DB 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 
+ DB 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 
+ DB 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 
+ DB 0, 6, 116, 6, 6, 6, 6, 116, 6, 43, 6, 116, 6, 6, 6, 6, 6, 6, 6, 6, 6, 116, 116, 116, 116, 116, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 
+ DB 6, 116, 6, 6, 6, 6, 116, 6, 43, 6, 116, 6, 6, 6, 6, 6, 6, 6, 6, 6, 116, 116, 116, 116, 116, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6 
+ DB 116, 6, 6, 6, 6, 116, 6, 43, 6, 116, 6, 6, 6, 6, 6, 6, 6, 6, 6, 116, 116, 116, 116, 116, 116, 116, 116, 116, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 116 
+ DB 6, 6, 6, 6, 116, 6, 43, 6, 116, 6, 6, 6, 6, 6, 6, 6, 6, 6, 116, 116, 116, 116, 116, 116, 116, 116, 116, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 116, 6 
+ DB 6, 6, 6, 116, 6, 43, 6, 116, 6, 6, 6, 6, 6, 6, 6, 6, 6, 116, 116, 116, 116, 116, 116, 116, 116, 116, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 116, 6, 6 
+ DB 6, 6, 116, 6, 43, 6, 116, 6, 6, 6, 6, 6, 6, 6, 6, 6, 116, 116, 116, 116, 116, 116, 116, 116, 116, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 116, 6, 6, 6 
+ DB 6, 116, 6, 43, 6, 116, 6, 6, 6, 6, 6, 6, 6, 6, 6, 116, 116, 116, 116, 116, 116, 116, 116, 116, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 116, 6, 6, 6, 6 
+ DB 116, 6, 43, 6, 116, 6, 6, 6, 6, 6, 6, 6, 6, 6, 116, 116, 116, 116, 116, 116, 116, 116, 116, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 116, 6, 6, 6, 6, 116 
+ DB 6, 43, 6, 116, 6, 6, 6, 6, 6, 6, 6, 6, 6, 116, 116, 116, 116, 116, 116, 116, 116, 116, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 116, 6, 6, 6, 6, 116, 6 
+ DB 43, 6, 116, 6, 6, 6, 6, 6, 6, 6, 6, 6, 116, 116, 116, 116, 116, 116, 116, 116, 116, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 116, 6, 6, 6, 6, 116, 6, 43 
+ DB 6, 116, 6, 6, 6, 6, 6, 6, 6, 6, 6, 116, 116, 116, 116, 116, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 116, 6, 6, 6, 6, 116, 6, 43, 6 
+ DB 116, 6, 6, 6, 6, 6, 6, 6, 6, 6, 116, 116, 116, 116, 116, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 
+ DB 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 
+ DB 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 
+ DB 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 
+ DB 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 ;------------------------------------------- END DATA SEGMENT --------------------------------------------------
 
 .code
@@ -915,7 +988,7 @@ mov al,dh
 mov ch,7
 ;div ch
 
-mov waitTime, ah
+mov waitTime, 3
 
 foulCheck:
 
@@ -974,12 +1047,12 @@ int 16h
 
 cmp ah,1eh
 ;je bullet
-je simulateP1Shot
+je ShootPlayerTwo
 
 
 cmp ah,1ch
 ;je bullet
-je simulateP2Shot
+je ShootPlayerOne
 
 mov ax,3
 int 33h     ;GET MOUSE BUTTON STATUS
@@ -1015,7 +1088,7 @@ int 16h
 
 cmp ah,1ch
 ;je bullet
-je simulateP2Shot
+je ShootPlayerOne
 
 
 mov ax,3
@@ -1048,7 +1121,7 @@ int 16h
 
 cmp ah,1eh
 ;je bullet
-je simulateP1Shot
+je ShootPlayerTwo
 
 mov ax,3
 int 33h
@@ -1637,5 +1710,124 @@ int 21h
 ret
 
 foulP2 endp
+
+ShootPlayerTwo PROC
+    mov bx,bulletOneXPosition    ;save the original value after shootting 
+    mov reset,bx
+    movebullet:
+        Call DrawPlayerOneBullet
+        ;Delay
+        ;Clear Previous shot
+        mov clearbulletone,1
+        call DrawPlayerOneBullet
+        mov clearbulletone,0
+        ;---------------------
+        ADD bulletOneXPosition,10        
+        CMP bulletOneXPosition,455
+        JNZ movebullet      	   
+        ;---------Reset the start position-----
+        mov bx,reset
+        mov bulletOneXPosition,bx
+    RET
+ShootPlayerTwo ENDP   
+;-------- Player two will shoot player one --------;
+ShootPlayerOne PROC
+    mov bx,bulletTwoXPosition   ;save the original value after shootting 
+    mov reset,bx
+    movebullet2:
+        Call DrawPlayerTwoBullet
+        ;Delay
+        ;Clear Previous shot
+        mov clearbulletone,1
+        call DrawPlayerTwoBullet
+        mov clearbulletone,0
+        ;---------------------
+        SUB bulletTwoXPosition,10        
+        CMP bulletTwoXPosition,140
+        JNZ movebullet2      	   
+        ;---------Reset the start position-----
+        mov bx,reset
+        mov bulletTwoXPosition,bx
+    RET
+ShootPlayerOne ENDP   
+DrawPlayerOneBullet PROC 
+	       ;mov ax, 4F02h    ;
+	       ;mov bx, 0100h    ; 640x400 screen graphics mode
+	       ;INT 10h      	;execute the configuration
+	       MOV AH,0Bh   	;set the configuration
+	       MOV CX, bulletOneXPosition  	;set the start drawing point 
+	       ADD CX, bulletimgW  	;set the width (X) up to 64 (based on image resolution)
+	       MOV DX, bulletOneYPosition 	;set the hieght (Y) up to 64 (based on image resolution)
+	       ADD DX, bulletimgH 	;set the hieght (Y) up to 64 (based on image resolution)
+		   mov DI, offset bulletimg  ; to iterate over the pixels
+	       jmp StartBullet    	;Avoid drawing before the calculations
+	DrawitBullet:
+	       MOV AH,0Ch   	;set the configuration to writing a pixel
+           cmp clearbulletone,1
+           JNZ currentcolor 
+           mov al, bgrndcolor        ; color of Background
+           MOV BH,00h   	;set the page number
+	       INT 10h      	;execute the configuration
+           jmp StartBullet
+    currentcolor: mov al, [DI]      ; color of the current coordinates 
+	       MOV BH,00h   	;set the page number
+	       INT 10h      	;execute the configuration
+	StartBullet: 
+		   inc DI
+	       DEC Cx       	;  loop iteration in x direction
+	       cmp Cx,bulletOneXPosition         ;JNZ Drawit      	;  check if we can draw c urrent x and y and excape the y iteration
+	       JNZ DrawitBullet
+           ADD Cx, bulletimgW 	;  if loop iteration in y direction, then x should start over so that we sweep the grid
+	       DEC DX       	;  loop iteration in y direction
+	       cmp DX,bulletOneYPosition
+           JZ  ENDINGBullet   	;  both x and y reached 00 so end program
+		   Jmp DrawitBullet
+
+	ENDINGBullet:
+	RET
+DrawPlayerOneBullet ENDP
+
+
+
+
+
+DrawPlayerTwoBullet PROC 
+	       ;mov ax, 4F02h    ;
+	       ;mov bx, 0100h    ; 640x400 screen graphics mode
+	       ;INT 10h      	;execute the configuration
+	       MOV AH,0Bh   	;set the configuration
+	       MOV CX, bulletTwoXPosition  	;set the start drawing point 
+	       ADD CX, bulletimgW  	;set the width (X) up to 64 (based on image resolution)
+	       MOV DX, bulletOneYPosition 	;set the hieght (Y) up to 64 (based on image resolution)
+	       ADD DX, bulletimgH 	;set the hieght (Y) up to 64 (based on image resolution)
+		   mov DI, offset bulletimg2  ; to iterate over the pixels
+	       jmp StartBullet2    	;Avoid drawing before the calculations
+	DrawitBullet2:
+	       MOV AH,0Ch   	;set the configuration to writing a pixel
+           cmp clearbulletone,1
+           JNZ currentcolor2 
+           mov al, bgrndcolor        ; color of Background
+           MOV BH,00h   	;set the page number
+	       INT 10h      	;execute the configuration
+           jmp StartBullet2
+    currentcolor2: mov al, [DI]      ; color of the current coordinates 
+	       MOV BH,00h   	;set the page number
+	       INT 10h      	;execute the configuration
+	StartBullet2: 
+		   inc DI
+	       DEC Cx       	;  loop iteration in x direction
+	       cmp Cx,bulletTwoXPosition         ;JNZ Drawit      	;  check if we can draw c urrent x and y and excape the y iteration
+	       JNZ DrawitBullet2
+           ADD Cx, bulletimgW 	;  if loop iteration in y direction, then x should start over so that we sweep the grid
+	       DEC DX       	;  loop iteration in y direction
+	       cmp DX,bulletOneYPosition
+           JZ  ENDINGBullet2   	;  both x and y reached 00 so end program
+		   Jmp DrawitBullet2
+
+	ENDINGBullet2:
+	RET
+DrawPlayerTwoBullet ENDP
+
+
 
 end main

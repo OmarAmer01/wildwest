@@ -737,7 +737,7 @@ MAIN PROC FAR
 	;--------- Wait for testing ----------
 	testing:mov ah, 07h   ;Input from keyboard without echo to the screen
 	int 21h
-    call ShootPlayerOne
+    call ShootPlayerTwo
     jmp testing
 MAIN ENDP	
 ;-------- Player one will shoot player two --------;
