@@ -735,10 +735,26 @@ MAIN PROC FAR
     call DrawPlayerOne
     call DrawPlayerTwo    
 	;--------- Wait for testing ----------
-	testing:mov ah, 07h   ;Input from keyboard without echo to the screen
-	int 21h
-    call ShootPlayerTwo
-    jmp testing
+	;testing:mov ah, 07h   ;Input from keyboard without echo to the screen
+	;int 21h
+    ;call ShootPlayerTwo
+   ; jmp testing
+testing:
+mov ah,1
+int 16h
+
+cmp ah,1eh              ; if letter 'a' not pressed
+jne nextComp            ; next comparison
+call ShootPlayerTwo
+
+nextComp:
+cmp ah,1ch               ; if enter key pressed
+jne testing
+call ShootPlayerOne
+
+jmp testing
+
+
 MAIN ENDP	
 ;-------- Player one will shoot player two --------;
 ShootPlayerTwo PROC

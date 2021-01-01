@@ -5,7 +5,7 @@
 Gtitle db 'Wild West','$'
 readystatement db 'Hold both mouse buttons to start!','$'
 missedshot db 'Missed Shot!','$'
-Pname1 db 'Amer','$'
+Pname1 db 'maxlengthnametest','$'
 Pname2 db 'Mousa','$'
 Pscore1 db 'Score: ','$'
 Pscore2 db 'Score: ','$'
@@ -24,14 +24,14 @@ main    PROC
 ;--------- if these configurations executed twice else where in the code all previous drawings will be lost ------;
        Call Stausbar
        Call GameReadyStatement
-       Call PlayerOneIncrementScore
-       Call PlayerOneIncrementScore
-       Call PlayerOneIncrementScore
-       Call PlayerOneIncrementScore
-       Call PlayerTwoIncrementScore
+      ; Call PlayerOneIncrementScore
+      ; Call PlayerOneIncrementScore
+      ; Call PlayerOneIncrementScore
+     ;  Call PlayerOneIncrementScore
+     ;  Call PlayerTwoIncrementScore
        Call ClearGameReadyStatement     ;Clear area before printing
-       Call MissedShotMessage1
-       Call MissedShotMessage2
+      ; Call MissedShotMessage1
+     ;  Call MissedShotMessage2
 
 main endp
 ;-----------Display the status bar  -----
@@ -47,7 +47,7 @@ Stausbar    PROC
         Call PlayerOneScore
         Call PlayerTwoScore
         ;Call PlayerOneStatusBarSheild
-        Call PlayerTwoStatusBarSheild
+       ; Call PlayerTwoStatusBarSheild
                 RET
 Stausbar endp
 ;-----------Display Game Title  -----
