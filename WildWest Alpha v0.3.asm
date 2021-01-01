@@ -47,7 +47,8 @@ P1key db ?
 P2key db ?
 P1HasSheild db 0d
 P2HasSheild db 0d
-
+ShieldWaitTime db ?
+ShieldWaitTimeInFunc db ?
 P1HasSheildPrompt db "Player 1 has shield ","$ "
 P2HasSheildPrompt db "Player 2 has shield ","$ "
 
@@ -1386,7 +1387,20 @@ mov al,dh
 mov ch,7
 ;div ch
 
-mov waitTime, 3
+mov ah,2ch
+int 21h
+
+mov al,dh ;randomize waitTime
+mov ah,0
+mov bh,6
+div bh
+add ah,4
+
+mov waitTime, ah
+sub ah,4
+mov ShieldWaitTime,ah ; time waited before call
+add ah,2
+mov ShieldWaitTimeInFunc,ah ;time inside the call if finished and no one pressed in time no one gets shield
 
 
 foulCheck:
@@ -1424,7 +1438,24 @@ ignore3:
 
 SUB dh,currSysTime		
 
-cmp dh,3			; lw el far2 mabenhom aktr mn waitTime 
+cmp dh,ShieldWaitTime ;check if its time to call shield
+jne skipShield
+call ShieldPrompt
+cmp P1HasSheild,0 ;check if p1 won shield
+jz skipShield1
+Call PlayerOneStatusBarSheild
+jmp skipShield
+skipShield1:
+cmp P2HasSheild,0 ;check if p2 won shield
+jz skipShield
+Call PlayerTwoStatusBarSheild
+skipShield:
+
+mov ah,2ch ;dh will shange in shield prompt func so redoing time get here
+int 21h
+SUB dh,currSysTime
+
+cmp dh,waitTime			; lw el far2 mabenhom aktr mn waitTime 
 						; break el loop
 						; howa 3mro ma hy break el loop ela
 						; lw m7d4 3amal foul
@@ -1965,7 +1996,7 @@ ShieldPrompt proc
 
 
 mov ax,0200h ;set mouse pos
-mov dx,0204h
+mov dx,0605h
 int 10h
 
 mov ah,2ch
@@ -2001,7 +2032,7 @@ lea dx,up
 int 21h
 
 mov ax,0200h ;set mouse pos
-mov dx,0404h
+mov dx,068Ch
 int 10h
 
 mov ah,9
@@ -2012,10 +2043,21 @@ mov ah,9
 lea dx,w
 int 21h
 
+
+
 jmp check1
 clr1:call clearkeyboardbuffer
 
-check1:mov ax,0
+check1:
+mov ah,2ch 
+int 21h
+SUB dh,currSysTime
+cmp dh,ShieldWaitTimeInFunc
+jne skipsp1
+ret
+skipsp1:
+
+mov ax,0
 mov ah,1h
 int 16h
 jz check1
@@ -2025,17 +2067,17 @@ add di,0
 cmp ah, [di]
 jnz skip1
 mov P1HasSheild,1
-mov ah,9
-lea dx,P1HasSheildPrompt
-int 21h
+; mov ah,9
+; lea dx,P1HasSheildPrompt
+; int 21h
 jmp l1
 skip1:add si,0
 cmp al,[si]
 jnz clr1
 mov P2HasSheild,1
-mov ah,9
-lea dx,P2HasSheildPrompt
-int 21h
+; mov ah,9
+; lea dx,P2HasSheildPrompt
+; int 21h
 jmp l1
 
 pright1:jmp pright
@@ -2046,7 +2088,7 @@ lea dx,left
 int 21h
 
 mov ax,0200h ;set mouse pos
-mov dx,0404h
+mov dx,068Ch
 int 10h
 
 mov ah,9
@@ -2060,7 +2102,16 @@ int 21h
 jmp check2
 clr2:call clearkeyboardbuffer
 
-check2: mov ax,0
+check2: 
+mov ah,2ch 
+int 21h
+SUB dh,currSysTime
+cmp dh,ShieldWaitTimeInFunc
+jne skipsp2
+ret
+skipsp2:
+
+mov ax,0
 mov ah,1h
 int 16h
 jz check2
@@ -2071,17 +2122,17 @@ jz check2
 cmp ah,[di+1]
 jnz skip2
 mov P1HasSheild,1
-mov ah,9
-lea dx,P1HasSheildPrompt
-int 21h
+; mov ah,9
+; lea dx,P1HasSheildPrompt
+; int 21h
 jmp l1
 skip2:;add si,1
 cmp al,[si+1]
 jnz clr2
 mov P2HasSheild,1
-mov ah,9
-lea dx,P2HasSheildPrompt
-int 21h
+; mov ah,9
+; lea dx,P2HasSheildPrompt
+; int 21h
 jmp l1
 
 
@@ -2092,7 +2143,7 @@ lea dx,down
 int 21h
 
 mov ax,0200h ;set mouse pos
-mov dx,0404h
+mov dx,068Ch
 int 10h
 
 mov ah,9
@@ -2107,6 +2158,14 @@ jmp check3
 clr3:call clearkeyboardbuffer
 
 check3:
+mov ah,2ch 
+int 21h
+SUB dh,currSysTime
+cmp dh,ShieldWaitTimeInFunc
+jne skipsp3
+ret
+skipsp3:
+
 mov ah,1
 int 16h
 jz check3
@@ -2115,17 +2174,17 @@ jz check3
 cmp ah, [di+2]
 jnz skip3
 mov P1HasSheild,1
-mov ah,9
-lea dx,P1HasSheildPrompt
-int 21h
+; mov ah,9
+; lea dx,P1HasSheildPrompt
+; int 21h
 jmp l
 skip3:
 cmp al,[si+2]
 jnz clr3
 mov P2HasSheild,1
-mov ah,9
-lea dx,P2HasSheildPrompt
-int 21h
+; mov ah,9
+; lea dx,P2HasSheildPrompt
+; int 21h
 jmp l
 
 
@@ -2135,7 +2194,7 @@ lea dx,right
 int 21h
 
 mov ax,0200h ;set mouse pos
-mov dx,0404h
+mov dx,068Ch
 int 10h
 
 mov ah,9
@@ -2149,7 +2208,17 @@ int 21h
 jmp check4
 clr4:call clearkeyboardbuffer
 
-check4: mov ax,0
+check4:
+mov ah,2ch 
+int 21h
+SUB dh,currSysTime
+cmp dh,ShieldWaitTimeInFunc
+
+jne skipsp4
+ret
+skipsp4:
+
+ mov ax,0
 mov ah,1
 int 16h
 jz check4
@@ -2159,16 +2228,16 @@ jz check4
 cmp ah,[di+3]
 jnz skip4
 mov P1HasSheild,1
-mov ah,9
-lea dx,P1HasSheildPrompt
-int 21h
+; mov ah,9
+; lea dx,P1HasSheildPrompt
+; int 21h
 jmp l
 skip4:;add si,3
 cmp al,[si+3]
 jnz clr4
-mov P2HasSheild,1
-mov ah,9
-lea dx,P2HasSheildPrompt
+; mov P2HasSheild,1
+; mov ah,9
+; lea dx,P2HasSheildPrompt
 int 21h
 jmp l
 
@@ -2478,6 +2547,10 @@ PlayerTwoIncrementScore    PROC
 PlayerTwoIncrementScore endp
 
 PlayerOneStatusBarSheild    PROC
+        mov si,@data;moves to si the location in memory of the data segment
+        mov es,si;moves to es the location in memory of the data segment
+        mov ah,13h;service to print string in graphic mode
+        mov al,0;sub-service 0 all the characters will be in the same color(bl)
         mov bl,00001100b;color of the text (white foreground and black background)
         ;     0000             1111
         ;|_ Background _| |_ Foreground _|
@@ -2490,6 +2563,10 @@ PlayerOneStatusBarSheild    PROC
         RET
 PlayerOneStatusBarSheild endp
 PlayerTwoStatusBarSheild    PROC
+        mov si,@data;moves to si the location in memory of the data segment
+        mov es,si;moves to es the location in memory of the data segment
+        mov ah,13h;service to print string in graphic mode
+        mov al,0;sub-service 0 all the characters will be in the same color(bl)
         mov bl,00001100b;color of the text (white foreground and black background)
         ;     0000             1111
         ;|_ Background _| |_ Foreground _|
