@@ -9,7 +9,7 @@
 
 Gtitle db 'The Wild West : Start Shooting! ','$'
 readystatement db 'Hold both mouse buttons to start!','$'
-missedshot db 'Missed Shot!','$'
+missedshot db 'Foul!','$'
 Pname1 db 16,?,30 dup ('$')
 Pname2 db 16,?,30 dup ('$')
 Pscore1 db 'Score: 0','$'
@@ -19,7 +19,7 @@ Pscorenum2 db '0','$'
 Pshield db 'Shield','$'
 ;-----------------------
 newLine db 13,10 , '$' 
-space db 33 dup (' ')
+
 
 						;for debugging purposes
 clearLine db 15 dup (' ') ,13,10,'$'
@@ -121,6 +121,7 @@ bulletTwoXPosition DW 470
 reset DW ?  
 
 bgrndcolor db 0           ;Set background color for images  
+clrColor db 0; el loon ele nrsm beh el kalam ama nkoon 3yzeen nms7
 
 clearbulletone DB 0   
 
@@ -1273,11 +1274,16 @@ call typeNamePtwo
 	INT 10h      	;To Graphics Mode
 
 
-;------------------------------------Start Ready Check--------------------------------
+startRound: ; makes the players start another round of wildwest
+call CLRMissedShotMessage2
+call CLRMissedShotMessage1
 call Statusbar
 Call GameReadyStatement 	;Telling players to get ready
 call PlayerOneScore
 Call PlayerTwoScore
+call CLRGameTitle
+;------------------------------------Start Ready Check--------------------------------
+
 
 pusha
 
@@ -1348,6 +1354,8 @@ call ClearGameReadyStatement
 ; n4of el time awl man5osh el foul check w b3d man5alas el check n4of el time tany, lw el wa2t 3ada mn 8er 
 ;ma ay player yrf3 el sela7 n5osh fel l3ba, 8er keda foul.
 
+
+
 mov ah,2ch
 int 21h    			;Get System time and put the seconds in memory variable
 
@@ -1372,10 +1380,20 @@ mov ax,3
 int 33h 		; get mouse button status
 
 cmp bx,1
-je foulP2		;lw 7d 3amal foul n2ool
+jne nextCompare
+call foulP2		;lw 7d 3amal foul n2ool
+jmp startRound  ;restart the game
+
+nextCompare:
 
 cmp bx,2
-je foulP1		;lw 7d 3amal foul n2ool
+
+jne skipComp
+
+call foulP1		;lw 7d 3amal foul n2ool
+jmp startRound ;restart the game
+
+skipComp:
 
 mov ah,2ch
 int 21h    	; nbos 3la el sa3a
@@ -1407,6 +1425,13 @@ Call GameTitle
 
 logic: ;the main game
 
+push ax
+push dx
+mov ah,6
+mov dl,255 ; Clears keyboard buffer
+int 21h
+pop DX
+pop ax
 
 call drawP1Raised                ; if no buttons are pressed this means that
 call drawP2Raised                ; both guns are held up
@@ -1419,6 +1444,7 @@ int 16h
 cmp ah,1eh              ; if letter 'a' not pressed
 jne nextComp            ; next comparison
 call ShootPlayerTwo
+jmp startRound
 
 push ax
 push dx
@@ -1432,7 +1458,7 @@ nextComp:
 cmp ah,1ch               ; if enter key pressed
 jne skipShooting
 call ShootPlayerOne
-
+jmp startRound
 push ax
 push dx
 mov ah,6
@@ -1484,8 +1510,10 @@ mov ah,1
 int 16h
 
 cmp ah,1ch
-
+jne skipShooting2
 call ShootPlayerOne
+jmp startRound
+
 push ax
 push dx
 mov ah,6
@@ -1494,11 +1522,12 @@ int 21h
 pop DX
 pop ax
 
+skipShooting2:
 mov ax,3
 int 33h			; Put mouse status in BX
 
 cmp bx,1
-call p1Down
+je p1Down
 
 
 
@@ -1523,8 +1552,10 @@ mov ah,1
 int 16h
 
 cmp ah,1eh
-
+jne skipShooting3
 call ShootPlayerTwo
+jmp startRound
+
 push ax
 push dx
 mov ah,6
@@ -1533,7 +1564,7 @@ int 21h
 pop DX
 pop ax
 
-
+skipShooting3:
 
 mov ax,3
 int 33h
@@ -2149,9 +2180,16 @@ foulP1 proc
 call drawP1Raised
 call drawP2Holstered
 
+call Statusbar
+call MissedShotMessage1
 
-call MissedShotMessage2
+mov ah,86h
+mov cl,30
 
+int 15h
+
+call Statusbar
+Call PlayerTwoIncrementScore
 ret
 
 foulP1 endp
@@ -2160,9 +2198,17 @@ foulP2 proc
 
 call drawP2Raised
 call drawP1Holstered
+call Statusbar
+call MissedShotMessage2
 
-call MissedShotMessage1
+mov ah,86h
+mov cl,30
 
+int 15h
+
+call Statusbar
+
+ Call PlayerOneIncrementScore
 ret
 
 foulP2 endp
@@ -2321,12 +2367,24 @@ GameTitle    PROC
         RET
 GameTitle endp
 
+CLRGameTitle    PROC
+        mov bl,clrColor;(foreground and background)
+        ;     0000             1111
+        ;|_ Background _| |_ Foreground _|
+        mov cx,31;length of string
+        mov dl, 23  ;Column
+        mov dh, 1  ;Row
+        mov bp,offset Gtitle;mov bp the offset of the string
+        int 10h
+        RET
+CLRGameTitle endp
+
 PlayerOneName    PROC
         mov bl,01001111b;color of the text (white foreground and black background)
         ;     0000             1111
         ;|_ Background _| |_ Foreground _|
 
-        mov cx,15;length of string
+        mov cx,3;length of string
         mov dl, 5  ;Column
         mov dh, 2  ;Row
         mov bp,offset Pname1+2;mov bp the offset of the string
@@ -2338,7 +2396,7 @@ PlayerTwoName    PROC
         mov bl,01011111b;(foreground and background)
         ;     0000             1111
         ;|_ Background _| |_ Foreground _|
-        mov cx,15;length of string
+        mov cx,3;length of string
         mov dl, 60  ;Column
         mov dh, 2  ;Row
         mov bp,offset Pname2+2;mov bp the offset of the string
@@ -2394,7 +2452,7 @@ PlayerTwoIncrementScore    PROC
         ;     0000             1111
         ;|_ Background _| |_ Foreground _|
         mov cx,1;length of string
-        mov dl, 77  ;Column
+        mov dl, 67  ;Column
         mov dh, 3  ;Row
         ADD Pscorenum2,1
         mov bp, offset Pscorenum2;mov bp the offset of the string
@@ -2439,20 +2497,10 @@ GameReadyStatement    PROC
         RET
 GameReadyStatement endp
 
-RemoveGameReadyStatement    PROC
-        mov bl,00001011b;(foreground and background)
-        ;     0000             1111
-        ;|_ Background _| |_ Foreground _|
-        mov cx,33;length of string
-        mov dl, 23  ;Column
-        mov dh, 10  ;Row
-        mov bp,offset space;mov bp the offset of the string
-        int 10h
-        RET
-RemoveGameReadyStatement endp
+
 
 ClearGameReadyStatement    PROC
-        mov bl,00000000b;(foreground and background)
+        mov bl,clrColor;(foreground and background)
         ;     0000             1111
         ;|_ Background _| |_ Foreground _|
         mov cx,33;length of string
@@ -2463,11 +2511,11 @@ ClearGameReadyStatement    PROC
         RET
 ClearGameReadyStatement endp
 ;-----------Display Missed Shot message for Player One  -----
-MissedShotMessage1    PROC
+MissedShotMessage1    PROC      ; shows foul
         mov bl,00001100b;(foreground and background)
         ;     0000             1111
         ;|_ Background _| |_ Foreground _|
-        mov cx,12;length of string
+        mov cx,5;length of string
         mov dl, 7  ;Column
         mov dh, 10  ;Row
         mov bp,offset missedshot;mov bp the offset of the string
@@ -2475,11 +2523,11 @@ MissedShotMessage1    PROC
         RET
 MissedShotMessage1 endp
 ;-----------Display Missed Shot message for Player Two  -----
-MissedShotMessage2    PROC
+MissedShotMessage2    PROC                              ; shows foul
         mov bl,00001100b;(foreground and background)
         ;     0000             1111
         ;|_ Background _| |_ Foreground _|
-        mov cx,12;length of string
+        mov cx,5;length of string
         mov dl, 65  ;Column
         mov dh, 10  ;Row
         mov bp,offset missedshot;mov bp the offset of the string
@@ -2487,6 +2535,30 @@ MissedShotMessage2    PROC
         RET
 MissedShotMessage2 endp
 
+
+CLRMissedShotMessage1    PROC      ; shows foul
+        mov bl,clrColor;(foreground and background)
+        ;     0000             1111
+        ;|_ Background _| |_ Foreground _|
+        mov cx,5;length of string
+        mov dl, 7  ;Column
+        mov dh, 10  ;Row
+        mov bp,offset missedshot;mov bp the offset of the string
+        int 10h
+        RET
+CLRMissedShotMessage1 endp
+;-----------Display Missed Shot message for Player Two  -----
+CLRMissedShotMessage2    PROC                              ; shows foul
+        mov bl,clrColor;(foreground and background)
+        ;     0000             1111
+        ;|_ Background _| |_ Foreground _|
+        mov cx,5;length of string
+        mov dl, 65  ;Column
+        mov dh, 10  ;Row
+        mov bp,offset missedshot;mov bp the offset of the string
+        int 10h
+        RET
+CLRMissedShotMessage2 endp
 
 
 end main
