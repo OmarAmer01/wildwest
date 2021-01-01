@@ -75,6 +75,16 @@ p2GunUp db "P2 Gun Up",13,10,'$'
 stayHolstered db "Keep your guns holstered until timer",13,10,'$'
 startGame db "Start The Game Now!!!!!!!!" ,13,10,'$'
 
+menu db 10,13, "Menu: "   ;menu bar 
+     db 10,13, "A.Game Mode "
+     db 10,13,  "B.chat mode $ "
+Game db 10,13, "Game Mode is Ready:$"
+chat db 10,13,"chating will open in phase 3$"
+Level_1 db 10,13, "A.Level 1 "
+        db 10,13,  "B.Level 2 $ "
+Level_2 db 10,13,"Level 1 is ON $"   
+Level_3 db 10,13,"Level 2 is ON $"   
+
 ;----------------Controls------------------------
 
 ArrowsSC db 48h,4Bh,50h,4dh 
@@ -1242,7 +1252,7 @@ call cursorToMiddle   ; Center cursor to display message
 
 call clearScreen ; to clear the screen    
 
-
+  
 
 lea dx,enterPoneName  ; print ENTER PLAYER 1
 mov ah,9
@@ -1263,7 +1273,14 @@ int 21h
 call typeNamePtwo
 ;----------------------------------TAKING NAMES COMPLETED-----------------------------
 
+
+
+
+
 ;---------------------Now we should choose to chat or play a round of wild west™------
+
+
+
 ;--------------------b3d ama n5tar b2a tbd2 el l3ba zy keda :
 
 
