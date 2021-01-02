@@ -1408,8 +1408,14 @@ startTheGame:
 
 
 startRound: ; makes the players start another round of wildwest
-mov P2HasSheild,0
-mov P1HasSheild,0
+;mov P2HasSheild,0
+;mov P1HasSheild,0
+
+call clrp1shield
+call clrp2shield
+call clrp1shieldprompt
+call clrp2shieldprompt
+
 call CLRMissedShotMessage2
 call CLRMissedShotMessage1
 call Statusbar
@@ -1417,8 +1423,8 @@ Call GameReadyStatement 	;Telling players to get ready
 call PlayerOneScore
 Call PlayerTwoScore
 call CLRGameTitle
-call clrPlayerTwoStatusBarSheild
-call clrPlayerOneStatusBarSheild
+;call clrPlayerTwoStatusBarSheild
+;call clrPlayerOneStatusBarSheild
 ;------------------------------------Start Ready Check--------------------------------
 
 
@@ -1569,6 +1575,8 @@ cmp P2HasSheild,0 ;check if p2 won shield
 jz skipShield
 Call PlayerTwoStatusBarSheild
 skipShield:
+call clrp1shieldprompt
+call clrp2shieldprompt
 
 mov ah,2ch ;dh will shange in shield prompt func so redoing time get here
 int 21h
@@ -2176,6 +2184,28 @@ jne skipsp1
 ret
 skipsp1:
 
+call drawP1Holstered
+call drawP2Holstered
+
+mov ax,3
+int 33h 		; get mouse button status
+
+cmp bx,1
+jne nextCompare1
+call foulP2		;lw 7d 3amal foul n2ool
+jmp startRound  ;restart the game
+
+nextCompare1:
+
+cmp bx,2
+
+jne skipComp1
+
+call foulP1		;lw 7d 3amal foul n2ool
+jmp startRound ;restart the game
+
+skipComp1:
+
 mov ax,0
 mov ah,1h
 int 16h
@@ -2229,6 +2259,20 @@ cmp dh,ShieldWaitTimeInFunc
 jne skipsp2
 ret
 skipsp2:
+
+call drawP1Holstered
+call drawP2Holstered
+
+mov ax,3
+int 33h 		; get mouse button status
+
+cmp bx,1
+jne nextCompare2
+call foulP2		;lw 7d 3amal foul n2ool
+jmp startRound  ;restart the game
+
+nextCompare2:
+
 
 mov ax,0
 mov ah,1h
@@ -2285,6 +2329,20 @@ jne skipsp3
 ret
 skipsp3:
 
+call drawP1Holstered
+call drawP2Holstered
+
+mov ax,3
+int 33h 		; get mouse button status
+
+cmp bx,1
+jne nextCompare3
+call foulP2		;lw 7d 3amal foul n2ool
+jmp startRound  ;restart the game
+
+nextCompare3:
+
+
 mov ah,1
 int 16h
 jz check3
@@ -2336,6 +2394,20 @@ cmp dh,ShieldWaitTimeInFunc
 jne skipsp4
 ret
 skipsp4:
+
+call drawP1Holstered
+call drawP2Holstered
+
+mov ax,3
+int 33h 		; get mouse button status
+
+cmp bx,1
+jne nextCompare4
+call foulP2		;lw 7d 3amal foul n2ool
+jmp startRound  ;restart the game
+
+nextCompare4:
+
 
  mov ax,0
 mov ah,1
@@ -2808,5 +2880,81 @@ CLRMissedShotMessage2    PROC                              ; shows foul
         RET
 CLRMissedShotMessage2 endp
 
+
+clrp1shieldprompt proc
+
+        mov si,@data;moves to si the location in memory of the data segment     
+        mov es,si;moves to es the location in memory of the data segment
+        mov ah,13h;service to print string in graphic mode
+        mov al,0;sub-service 0 all the characters will be in the same color(bl)
+        mov bl,clrColor;color of the text (white foreground and black background)
+        ;     0000             1111
+        ;|_ Background _| |_ Foreground _|
+
+        mov cx,7;length of string
+        mov dl, 5  ;Column
+        mov dh, 6  ;Row
+        mov bp,offset w;mov bp the offset of the string
+        int 10h
+        RET
+
+clrp1shieldprompt endp
+
+clrp2shieldprompt proc
+
+        mov si,@data;moves to si the location in memory of the data segment     
+        mov es,si;moves to es the location in memory of the data segment
+        mov ah,13h;service to print string in graphic mode
+        mov al,0;sub-service 0 all the characters will be in the same color(bl)
+        mov bl,clrColor;color of the text (white foreground and black background)
+        ;     0000             1111
+        ;|_ Background _| |_ Foreground _|
+
+        mov cx,7;length of string
+        mov dl, 8Ch  ;Column
+        mov dh, 6  ;Row
+        mov bp,offset w;mov bp the offset of the string
+        int 10h
+        RET
+
+clrp2shieldprompt endp
+
+clrp1shield proc
+
+        mov si,@data;moves to si the location in memory of the data segment
+        mov es,si;moves to es the location in memory of the data segment
+        mov ah,13h;service to print string in graphic mode
+        mov al,0;sub-service 0 all the characters will be in the same color(bl)
+        mov bl,clrColor;color of the text (white foreground and black background)
+        ;     0000             1111
+        ;|_ Background _| |_ Foreground _|
+
+        mov cx,6;length of string
+        mov dl, 5  ;Column
+        mov dh, 4  ;Row
+        mov bp,offset Pshield;mov bp the offset of the string
+        int 10h
+        RET
+
+clrp1shield endp
+
+clrp2shield proc
+
+        mov si,@data;moves to si the location in memory of the data segment
+        mov es,si;moves to es the location in memory of the data segment
+        mov ah,13h;service to print string in graphic mode
+        mov al,0;sub-service 0 all the characters will be in the same color(bl)
+        mov bl,clrColor;color of the text (white foreground and black background)
+        ;     0000             1111
+        ;|_ Background _| |_ Foreground _|
+
+        mov cx,6;length of string
+        mov dl, 70  ;Column
+        mov dh, 4  ;Row
+        mov bp,offset Pshield;mov bp the offset of the string
+        int 10h
+        RET
+
+clrp2shield endp
 
 end main
