@@ -12,10 +12,16 @@ readystatement db 'Hold both mouse buttons to start!','$'
 missedshot db 'Foul!','$'
 Pname1 db 16,?,30 dup ('$')
 Pname2 db 16,?,30 dup ('$')
-Pscore1 db 'Score: 0','$'
-Pscore2 db 'Score: 0','$'
-Pscorenum1 db '0','$'
-Pscorenum2 db '0','$'
+Pscore1 db 'Score:','$'
+Pscore2 db 'Score:','$'
+;Pscorenum1 db '0','$'
+;Pscorenum2 db '0','$'
+
+Pscorenum1 db 47,'$'
+Pscorenum2 db 47,'$'
+
+
+
 Pshield db 'Shield','$'
 ;-----------------------
 newLine db 13,10 , '$' 
@@ -1411,6 +1417,9 @@ startRound: ; makes the players start another round of wildwest
 ;mov P2HasSheild,0
 ;mov P1HasSheild,0
 
+call PlayerOneIncrementScore
+call PlayerTwoIncrementScore
+
 call clrp1shield
 call clrp2shield
 call clrp1shieldprompt
@@ -1423,8 +1432,8 @@ Call GameReadyStatement 	;Telling players to get ready
 call PlayerOneScore
 Call PlayerTwoScore
 call CLRGameTitle
-;call clrPlayerTwoStatusBarSheild
-;call clrPlayerOneStatusBarSheild
+call clrPlayerTwoStatusBarSheild
+call clrPlayerOneStatusBarSheild
 ;------------------------------------Start Ready Check--------------------------------
 
 
@@ -2466,7 +2475,7 @@ mov cl,30
 int 15h
 
 call Statusbar
-Call PlayerTwoIncrementScore
+
 ret
 
 foulP1 endp
@@ -2485,7 +2494,7 @@ int 15h
 
 call Statusbar
 
- Call PlayerOneIncrementScore
+ 
 ret
 
 foulP2 endp
@@ -2687,7 +2696,7 @@ PlayerOneScore    PROC
         ;     0000             1111
         ;|_ Background _| |_ Foreground _|
 
-        mov cx,8;length of string
+        mov cx,6;length of string
         mov dl, 5  ;Column
         mov dh, 3  ;Row
         mov bp,offset Pscore1;mov bp the offset of the string
@@ -2699,7 +2708,7 @@ PlayerTwoScore    PROC
         mov bl,01011111b;(foreground and background)
         ;     0000             1111
         ;|_ Background _| |_ Foreground _|
-        mov cx,8;length of string
+        mov cx,6;length of string
         mov dl, 60  ;Column
         mov dh, 3  ;Row
         mov bp,offset Pscore2;mov bp the offset of the string
@@ -2708,6 +2717,7 @@ PlayerTwoScore    PROC
 PlayerTwoScore endp
 
 PlayerOneIncrementScore    PROC
+        call Statusbar
         mov bl,01001111b;color of the text (white foreground and black background)
         ;     0000             1111
         ;|_ Background _| |_ Foreground _|
@@ -2725,6 +2735,8 @@ PlayerOneIncrementScore endp
 
 ;-----------Display Player One Name  -----
 PlayerTwoIncrementScore    PROC
+                call Statusbar
+
         mov bl,01011111b;(foreground and background)
         ;     0000             1111
         ;|_ Background _| |_ Foreground _|
