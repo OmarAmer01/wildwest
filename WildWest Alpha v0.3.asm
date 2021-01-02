@@ -1408,9 +1408,6 @@ startTheGame:
 
 
 startRound: ; makes the players start another round of wildwest
-;mov P2HasSheild,0
-;mov P1HasSheild,0
-
 call clrp1shield
 call clrp2shield
 call clrp1shieldprompt
@@ -1423,11 +1420,12 @@ Call GameReadyStatement 	;Telling players to get ready
 call PlayerOneScore
 Call PlayerTwoScore
 call CLRGameTitle
-;call clrPlayerTwoStatusBarSheild
-;call clrPlayerOneStatusBarSheild
+call clrPlayerTwoStatusBarSheild
+call clrPlayerOneStatusBarSheild
 ;------------------------------------Start Ready Check--------------------------------
 
-
+mov P2HasSheild,0
+mov P1HasSheild,0
 pusha
 
 readyCheck:         ; loop to make sure players have their guns
@@ -1565,6 +1563,7 @@ SUB dh,currSysTime
 
 cmp dh,ShieldWaitTime ;check if its time to call shield
 jne skipShield
+call clearkeyboardbuffer
 call ShieldPrompt
 cmp P1HasSheild,0 ;check if p1 won shield
 jz skipShield1
@@ -2126,13 +2125,6 @@ mov ax,0200h ;set mouse pos
 mov dx,0605h
 int 10h
 
-mov ah,2ch
-int 21h
-mov ax,dx
-mov dx,0
-mov ah,0
-mov bl,4
-div bl      ; do calculations based on system time
 
 
 mov ah,9
@@ -2145,14 +2137,22 @@ int 21h
 lea di,ArrowsSC
 lea si,wasdSC
 
+mov ah,2ch
+int 21h
+mov ax,dx
+mov dx,0
+mov ah,0
+mov bl,4
+div bl      ; do calculations based on system time
+
 cmp ah,0
 jz pup
 cmp ah,1
 jz pleft
 cmp ah,2
-jz pdown1
+jz pdown
 cmp ah,3
-jz pright1
+jz pright
 
 pup: mov ah,9
 lea dx,up
@@ -2213,26 +2213,23 @@ jz check1
 
 
 add di,0
-cmp ah, [di]
+cmp ah, 48h
 jnz skip1
 mov P1HasSheild,1
 ; mov ah,9
 ; lea dx,P1HasSheildPrompt
 ; int 21h
-jmp l1
+jmp l
 skip1:add si,0
-cmp al,[si]
+cmp al,77h
 jnz clr1
 mov P2HasSheild,1
 ; mov ah,9
 ; lea dx,P2HasSheildPrompt
 ; int 21h
-jmp l1
+jmp l
 
-pright1:jmp pright
-pdown1: jmp pdown
-
-pleft: mov ah,9
+pleft:mov ah,9
 lea dx,left
 int 21h
 
@@ -2248,10 +2245,12 @@ mov ah,9
 lea dx,a
 int 21h
 
+
+
 jmp check2
 clr2:call clearkeyboardbuffer
 
-check2: 
+check2:
 mov ah,2ch 
 int 21h
 SUB dh,currSysTime
@@ -2273,6 +2272,14 @@ jmp startRound  ;restart the game
 
 nextCompare2:
 
+cmp bx,2
+
+jne skipComp2
+
+call foulP1		;lw 7d 3amal foul n2ool
+jmp startRound ;restart the game
+
+skipComp2:
 
 mov ax,0
 mov ah,1h
@@ -2280,23 +2287,23 @@ int 16h
 jz check2
 
 
-
-;add di,1
-cmp ah,[di+1]
+add di,0
+cmp ah, 4Bh
 jnz skip2
 mov P1HasSheild,1
 ; mov ah,9
 ; lea dx,P1HasSheildPrompt
 ; int 21h
-jmp l1
+jmp l
 skip2:;add si,1
-cmp al,[si+1]
+cmp al,61h
 jnz clr2
 mov P2HasSheild,1
 ; mov ah,9
 ; lea dx,P2HasSheildPrompt
 ; int 21h
-jmp l1
+jmp l
+
 
 
 l1:jmp l
@@ -2316,6 +2323,8 @@ int 21h
 mov ah,9
 lea dx,s
 int 21h
+
+
 
 jmp check3
 clr3:call clearkeyboardbuffer
@@ -2342,27 +2351,38 @@ jmp startRound  ;restart the game
 
 nextCompare3:
 
+cmp bx,2
 
-mov ah,1
+jne skipComp3
+
+call foulP1		;lw 7d 3amal foul n2ool
+jmp startRound ;restart the game
+
+skipComp3:
+
+mov ax,0
+mov ah,1h
 int 16h
 jz check3
 
-;add di,2
-cmp ah, [di+2]
+
+add di,0
+cmp ah, 50h
 jnz skip3
 mov P1HasSheild,1
 ; mov ah,9
 ; lea dx,P1HasSheildPrompt
 ; int 21h
 jmp l
-skip3:
-cmp al,[si+2]
-jnz clr3
+skip3:add si,2
+cmp al,73h
+jnz clr1
 mov P2HasSheild,1
 ; mov ah,9
 ; lea dx,P2HasSheildPrompt
 ; int 21h
 jmp l
+
 
 
 
@@ -2382,6 +2402,8 @@ mov ah,9
 lea dx,d
 int 21h
 
+
+
 jmp check4
 clr4:call clearkeyboardbuffer
 
@@ -2390,7 +2412,6 @@ mov ah,2ch
 int 21h
 SUB dh,currSysTime
 cmp dh,ShieldWaitTimeInFunc
-
 jne skipsp4
 ret
 skipsp4:
@@ -2408,28 +2429,36 @@ jmp startRound  ;restart the game
 
 nextCompare4:
 
+cmp bx,2
 
- mov ax,0
-mov ah,1
+jne skipComp4
+
+call foulP1		;lw 7d 3amal foul n2ool
+jmp startRound ;restart the game
+
+skipComp4:
+
+mov ax,0
+mov ah,1h
 int 16h
 jz check4
 
 
-;add di,3
-cmp ah,[di+3]
+add di,0
+cmp ah, 4Dh
 jnz skip4
 mov P1HasSheild,1
 ; mov ah,9
 ; lea dx,P1HasSheildPrompt
 ; int 21h
 jmp l
-skip4:;add si,3
-cmp al,[si+3]
+skip4:add si,3
+cmp al,64h
 jnz clr4
-; mov P2HasSheild,1
+mov P2HasSheild,1
 ; mov ah,9
 ; lea dx,P2HasSheildPrompt
-int 21h
+; int 21h
 jmp l
 
 l:ret
