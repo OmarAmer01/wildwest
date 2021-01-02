@@ -14,11 +14,9 @@ Pname1 db 16,?,30 dup ('$')
 Pname2 db 16,?,30 dup ('$')
 Pscore1 db 'Score:','$'
 Pscore2 db 'Score:','$'
-;Pscorenum1 db '0','$'
-;Pscorenum2 db '0','$'
 
-Pscorenum1 db 47,'$'
-Pscorenum2 db 47,'$'
+Pscorenum1 db 47
+Pscorenum2 db 47
 
 
 
@@ -1414,15 +1412,15 @@ startTheGame:
 
 
 startRound: ; makes the players start another round of wildwest
-<<<<<<< HEAD
-=======
+
+
 ;mov P2HasSheild,0
 ;mov P1HasSheild,0
 
-call PlayerOneIncrementScore
-call PlayerTwoIncrementScore
 
->>>>>>> f56600b8f1d104d14096446ef1a12d0f66ca95be
+
+;;;;Call score adjusters
+
 call clrp1shield
 call clrp2shield
 call clrp1shieldprompt
@@ -1437,6 +1435,8 @@ Call PlayerTwoScore
 call CLRGameTitle
 call clrPlayerTwoStatusBarSheild
 call clrPlayerOneStatusBarSheild
+
+call scoreAdjust
 ;------------------------------------Start Ready Check--------------------------------
 
 mov P2HasSheild,0
@@ -2752,7 +2752,11 @@ PlayerTwoScore    PROC
 PlayerTwoScore endp
 
 PlayerOneIncrementScore    PROC
-        call Statusbar
+        	mov si,@data;moves to si the location in memory of the data segment
+        mov es,si;moves to es the location in memory of the data segment
+        mov ah,13h;service to print string in graphic mode
+        mov al,0;sub-service 0 all the characters will be in the same color(bl)
+        mov bh,0;page number=always zero
         mov bl,01001111b;color of the text (white foreground and black background)
         ;     0000             1111
         ;|_ Background _| |_ Foreground _|
@@ -2770,7 +2774,11 @@ PlayerOneIncrementScore endp
 
 ;-----------Display Player One Name  -----
 PlayerTwoIncrementScore    PROC
-                call Statusbar
+           	mov si,@data;moves to si the location in memory of the data segment
+        mov es,si;moves to es the location in memory of the data segment
+        mov ah,13h;service to print string in graphic mode
+        mov al,0;sub-service 0 all the characters will be in the same color(bl)
+        mov bh,0;page number=always zero
 
         mov bl,01011111b;(foreground and background)
         ;     0000             1111
@@ -3003,5 +3011,15 @@ clrp2shield proc
         RET
 
 clrp2shield endp
+
+scoreAdjust proc
+
+cmp Pscore1,47
+jne skipthis
+call PlayerOneIncrementScore
+skipthis:
+
+ret
+scoreAdjust endp
 
 end main
