@@ -104,7 +104,7 @@ w  db  "w ","$ "
 a  db  "a ","$ "
 s  db  "s ","$ "
 d  db  "d ","$ ";shield end
-
+shieldDone db 0
 
 
 ;The following are Graphics related data
@@ -1441,6 +1441,7 @@ call scoreAdjust
 
 mov P2HasSheild,0
 mov P1HasSheild,0
+mov shieldDone,0
 pusha
 
 readyCheck:         ; loop to make sure players have their guns
@@ -1575,11 +1576,13 @@ ignore3:
 
 
 SUB dh,currSysTime		
-
+cmp shieldDone,1
+jz skipShield
 cmp dh,ShieldWaitTime ;check if its time to call shield
 jne skipShield
 call clearkeyboardbuffer
 call ShieldPrompt
+mov shieldDone,1
 cmp P1HasSheild,0 ;check if p1 won shield
 jz skipShield1
 Call PlayerOneStatusBarSheild
