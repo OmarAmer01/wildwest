@@ -2181,7 +2181,7 @@ cmp ah,3
 jz pright
 
 pup: mov ah,9
-lea dx,up
+lea dx,w
 int 21h
 
 mov ax,0200h ;set mouse pos
@@ -2193,7 +2193,7 @@ lea dx,Prompt
 int 21h
 
 mov ah,9
-lea dx,w
+lea dx,up
 int 21h
 
 
@@ -2241,7 +2241,7 @@ jz check1
 add di,0
 cmp ah, 48h
 jnz skip1
-mov P1HasSheild,1
+mov P2HasSheild,1
 ; mov ah,9
 ; lea dx,P1HasSheildPrompt
 ; int 21h
@@ -2249,14 +2249,14 @@ jmp l
 skip1:add si,0
 cmp al,77h
 jnz clr1
-mov P2HasSheild,1
+mov P1HasSheild,1
 ; mov ah,9
 ; lea dx,P2HasSheildPrompt
 ; int 21h
 jmp l
 
 pleft:mov ah,9
-lea dx,left
+lea dx,a
 int 21h
 
 mov ax,0200h ;set mouse pos
@@ -2268,7 +2268,7 @@ lea dx,Prompt
 int 21h
 
 mov ah,9
-lea dx,a
+lea dx,left
 int 21h
 
 
@@ -2316,7 +2316,7 @@ jz check2
 add di,0
 cmp ah, 4Bh
 jnz skip2
-mov P1HasSheild,1
+mov P2HasSheild,1
 ; mov ah,9
 ; lea dx,P1HasSheildPrompt
 ; int 21h
@@ -2324,7 +2324,7 @@ jmp l
 skip2:;add si,1
 cmp al,61h
 jnz clr2
-mov P2HasSheild,1
+mov P1HasSheild,1
 ; mov ah,9
 ; lea dx,P2HasSheildPrompt
 ; int 21h
@@ -2335,7 +2335,7 @@ jmp l
 l1:jmp l
 
 pdown: mov ah,9
-lea dx,down
+lea dx,s
 int 21h
 
 mov ax,0200h ;set mouse pos
@@ -2347,7 +2347,7 @@ lea dx,Prompt
 int 21h
 
 mov ah,9
-lea dx,s
+lea dx,down
 int 21h
 
 
@@ -2395,7 +2395,7 @@ jz check3
 add di,0
 cmp ah, 50h
 jnz skip3
-mov P1HasSheild,1
+mov P2HasSheild,1
 ; mov ah,9
 ; lea dx,P1HasSheildPrompt
 ; int 21h
@@ -2403,7 +2403,7 @@ jmp l
 skip3:add si,2
 cmp al,73h
 jnz clr1
-mov P2HasSheild,1
+mov P1HasSheild,1
 ; mov ah,9
 ; lea dx,P2HasSheildPrompt
 ; int 21h
@@ -2413,7 +2413,7 @@ jmp l
 
 
 pright:mov ah,9
-lea dx,right
+lea dx,d
 int 21h
 
 mov ax,0200h ;set mouse pos
@@ -2425,7 +2425,7 @@ lea dx,Prompt
 int 21h
 
 mov ah,9
-lea dx,d
+lea dx,right
 int 21h
 
 
@@ -2473,7 +2473,7 @@ jz check4
 add di,0
 cmp ah, 4Dh
 jnz skip4
-mov P1HasSheild,1
+mov P2HasSheild,1
 ; mov ah,9
 ; lea dx,P1HasSheildPrompt
 ; int 21h
@@ -2481,7 +2481,7 @@ jmp l
 skip4:add si,3
 cmp al,64h
 jnz clr4
-mov P2HasSheild,1
+mov P1HasSheild,1
 ; mov ah,9
 ; lea dx,P2HasSheildPrompt
 ; int 21h
