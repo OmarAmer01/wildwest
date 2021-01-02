@@ -1412,14 +1412,10 @@ startTheGame:
 
 
 startRound: ; makes the players start another round of wildwest
-
-
-;mov P2HasSheild,0
-;mov P1HasSheild,0
+            ; b3d ma nsamy, bn3ml shwayet initializations keda 
 
 
 
-;;;;Call score adjusters
 
 call clrp1shield
 call clrp2shield
@@ -1436,7 +1432,18 @@ call CLRGameTitle
 call clrPlayerTwoStatusBarSheild
 call clrPlayerOneStatusBarSheild
 
-call scoreAdjust
+
+cmp Pscorenum1,47
+jne skipthis
+call PlayerOneIncrementScore
+skipthis:
+                                        ; A Work arround el issua bta3et el score
+                                        ; real friends know whats up
+cmp Pscorenum2,47
+jne skipthisToo
+call PlayerTwoIncrementScore
+skipthisToo:
+
 ;------------------------------------Start Ready Check--------------------------------
 
 mov P2HasSheild,0
@@ -1510,6 +1517,7 @@ call ClearGameReadyStatement
 
 ; n4of el time awl man5osh el foul check w b3d man5alas el check n4of el time tany, lw el wa2t 3ada mn 8er 
 ;ma ay player yrf3 el sela7 n5osh fel l3ba, 8er keda foul.
+
 
 
 
@@ -2512,6 +2520,9 @@ mov cl,30
 
 int 15h
 
+call PlayerTwoIncrementScore
+
+
 call Statusbar
 
 ret
@@ -2527,8 +2538,9 @@ call MissedShotMessage2
 
 mov ah,86h
 mov cl,30
-
 int 15h
+
+call PlayerOneIncrementScore
 
 call Statusbar
 
@@ -2558,6 +2570,11 @@ mov ah,0
         mov bx,reset
         mov bulletOneXPosition,bx
 
+        cmp P2HasSheild,1
+        je breakShield
+        call PlayerOneIncrementScore
+        breakShield:
+        mov P2HasSheild,0
         
     RET
 ShootPlayerTwo ENDP   
@@ -2580,7 +2597,11 @@ ShootPlayerOne PROC
         mov bx,reset
         mov bulletTwoXPosition,bx
 
-
+cmp P1HasSheild,1
+        je breakShield2
+        call PlayerTwoIncrementScore
+        breakShield2:
+        mov P1HasSheild,0
 
 
     RET
@@ -3017,10 +3038,7 @@ clrp2shield endp
 
 scoreAdjust proc
 
-cmp Pscore1,47
-jne skipthis
-call PlayerOneIncrementScore
-skipthis:
+
 
 ret
 scoreAdjust endp
