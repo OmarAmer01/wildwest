@@ -2911,6 +2911,10 @@ mov ah,0
     movebullet:
         Call DrawPlayerOneBullet
         ;Delay
+        mov ah,86h
+	mov cx,0000H
+        mov dx,9999
+        int 15h
         ;Clear Previous shot
         mov clearbulletone,1
         call DrawPlayerOneBullet
@@ -2938,6 +2942,10 @@ ShootPlayerOne PROC
     movebullet2:
         Call DrawPlayerTwoBullet
         ;Delay
+        mov ah,86h
+	mov cx,0000H
+        mov dx,9999
+        int 15h
         ;Clear Previous shot
         mov clearbulletone,1
         call DrawPlayerTwoBullet
@@ -2995,9 +3003,6 @@ DrawPlayerOneBullet PROC
 	ENDINGBullet:
 	RET
 DrawPlayerOneBullet ENDP
-
-
-
 
 
 DrawPlayerTwoBullet PROC 
