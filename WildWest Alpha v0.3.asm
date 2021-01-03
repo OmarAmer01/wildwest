@@ -132,7 +132,17 @@ bulletOneXPosition DW 145  ;Bullet One X_Position
 bulletOneYPosition equ 316 ;Bullet One Y_Position
 
 bulletTwoXPosition DW 470
+;-------- Shield Date------------
+shieldP1X DW 30        ;Player One Shield coordenate 
+shieldP1Y DW 280 
+shieldP1Width DW 160 
+shieldP1Hieght DW 400
 
+shieldP2X DW 485        ;Player One Shield coordenate 
+shieldP2Y DW 280
+shieldP2Width DW 600 
+shieldP2Hieght DW 400
+;--------------------------------------
 reset DW ?  
 
 bgrndcolor db 0           ;Set background color for images  
@@ -2227,7 +2237,101 @@ bgrndsolidcolor PROC
 			jnz back1
     RET
 bgrndsolidcolor ENDP
+;------------ Shield graphics --------
+drawP1Shield PROC 
+	    MOV AH,0Bh   	;set the configuration
+	    mov cx,shieldP1X  ;Column
+        mov dx,shieldP1Y        ;Row       
+        mov al,03h        ;Pixel color
+        mov ah,0ch       ;Draw Pixel Command
+        horizontal:int 10h
+        inc cx
+        cmp cx,shieldP1Width
+        JNZ horizontal
+        verticalleft:int 10h
+        inc dx
+        cmp dx,shieldP1Hieght
+        JNZ verticalleft
+        mov cx,shieldP1X
+        mov dx,shieldP1Y
+        verticalright:int 10h
+        inc dx
+        cmp dx,shieldP1Hieght
+        JNZ verticalright
+	RET
+drawP1Shield ENDP
 
+drawP2Shield PROC 
+	       
+	    MOV AH,0Bh   	;set the configuration
+	    mov cx,shieldP2X  ;Column
+        mov dx,shieldP2Y        ;Row       
+        mov al,03h        ;Pixel color
+        mov ah,0ch       ;Draw Pixel Command
+        horizontal2:int 10h
+        inc cx
+        cmp cx,shieldP2Width
+        JNZ horizontal2
+        verticalleft2:int 10h
+        inc dx
+        cmp dx,shieldP2Hieght
+        JNZ verticalleft2
+        mov cx,shieldP2X
+        mov dx,shieldP2Y
+        verticalright2:int 10h
+        inc dx
+        cmp dx,shieldP2Hieght
+        JNZ verticalright2
+	RET
+drawP2Shield ENDP
+
+ClearP1Shield PROC 
+	       
+	    MOV AH,0Bh   	;set the configuration
+	    mov cx,shieldP1X  ;Column
+        mov dx,shieldP1Y        ;Row       
+        mov al,bgrndcolor        ;Pixel color
+        mov ah,0ch       ;Draw Pixel Command
+        horizontalc:int 10h
+        inc cx
+        cmp cx,shieldP1Width
+        JNZ horizontalc
+        verticalleftc:int 10h
+        inc dx
+        cmp dx,shieldP1Hieght
+        JNZ verticalleftc
+        mov cx,shieldP1X
+        mov dx,shieldP1Y
+        verticalrightc:int 10h
+        inc dx
+        cmp dx,shieldP1Hieght
+        JNZ verticalrightc
+	RET
+ClearP1Shield ENDP
+
+ClearP2Shield PROC 
+	       
+	    MOV AH,0Bh   	;set the configuration
+	    mov cx,shieldP2X  ;Column
+        mov dx,shieldP2Y        ;Row       
+        mov al,bgrndcolor        ;Pixel color
+        mov ah,0ch       ;Draw Pixel Command
+        horizontal2c:int 10h
+        inc cx
+        cmp cx,shieldP2Width
+        JNZ horizontal2c
+        verticalleft2c:int 10h
+        inc dx
+        cmp dx,shieldP2Hieght
+        JNZ verticalleft2c
+        mov cx,shieldP2X
+        mov dx,shieldP2Y
+        verticalright2c:int 10h
+        inc dx
+        cmp dx,shieldP2Hieght
+        JNZ verticalright2c
+	RET
+ClearP2Shield ENDP
 exit proc ; Exit the application
     mov ah,4ch
     int 21h
@@ -2978,7 +3082,7 @@ PlayerOneName    PROC
         ;     0000             1111
         ;|_ Background _| |_ Foreground _|
 
-        mov cx,3;length of string
+        mov cx,5;length of string
         mov dl, 5  ;Column
         mov dh, 2  ;Row
         mov bp,offset Pname1+2;mov bp the offset of the string
@@ -2990,7 +3094,7 @@ PlayerTwoName    PROC
         mov bl,01011111b;(foreground and background)
         ;     0000             1111
         ;|_ Background _| |_ Foreground _|
-        mov cx,3;length of string
+        mov cx,5;length of string
         mov dl, 60  ;Column
         mov dh, 2  ;Row
         mov bp,offset Pname2+2;mov bp the offset of the string
@@ -3066,6 +3170,7 @@ PlayerTwoIncrementScore    PROC
 PlayerTwoIncrementScore endp
 
 PlayerOneStatusBarSheild    PROC
+        call drawP1Shield   ;Draw Blue shield on the player
         mov si,@data;moves to si the location in memory of the data segment
         mov es,si;moves to es the location in memory of the data segment
         mov ah,13h;service to print string in graphic mode
@@ -3082,6 +3187,7 @@ PlayerOneStatusBarSheild    PROC
         RET
 PlayerOneStatusBarSheild endp
 PlayerTwoStatusBarSheild    PROC
+        call drawP2Shield   ;Draw Blue shield on the player
         mov si,@data;moves to si the location in memory of the data segment
         mov es,si;moves to es the location in memory of the data segment
         mov ah,13h;service to print string in graphic mode
@@ -3099,6 +3205,7 @@ PlayerTwoStatusBarSheild    PROC
 PlayerTwoStatusBarSheild endp
 
 clrPlayerOneStatusBarSheild    PROC
+        CAll ClearP1Shield
         mov si,@data;moves to si the location in memory of the data segment
         mov es,si;moves to es the location in memory of the data segment
         mov ah,13h;service to print string in graphic mode
@@ -3116,6 +3223,7 @@ clrPlayerOneStatusBarSheild    PROC
 clrPlayerOneStatusBarSheild endp
 
 clrPlayerTwoStatusBarSheild    PROC
+        CAll ClearP2Shield
         mov si,@data;moves to si the location in memory of the data segment
         mov es,si;moves to es the location in memory of the data segment
         mov ah,13h;service to print string in graphic mode
