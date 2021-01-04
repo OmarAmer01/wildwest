@@ -1,6 +1,6 @@
 
 .model compact
-.386		        ;using the 8086 by5aleek
+.386		;using the 8086 by5aleek
 			; mt3rf4 t3ml jmp kbeer
 			; el 80386 dh ebn 5alet el 8086
 			; w by3ml kol 7aga a7sn meno
@@ -11,14 +11,12 @@ Gtitle db 'The Wild West : Start Shooting! ','$'
 readystatement db 'Hold both mouse buttons to start!','$'
 missedshot db 'Foul!','$'
 Pname1 db 16,?,30 dup ('$')
-p1NameLen dw 0,'$'
 Pname2 db 16,?,30 dup ('$')
-p2NameLen dw 0,'$'
 Pscore1 db 'Score:','$'
 Pscore2 db 'Score:','$'
 
-Pscorenum1 db 47,'$'
-Pscorenum2 db 47,'$'
+Pscorenum1 db 47
+Pscorenum2 db 47
 
 
 
@@ -55,8 +53,32 @@ P1HasSheild db 0d
 P2HasSheild db 0d
 ShieldWaitTime db ?
 ShieldWaitTimeInFunc db ?
+P1HasSheildPrompt db "Player 1 has shield ","$ "
+P2HasSheildPrompt db "Player 2 has shield ","$ "
+
+mbPrompt db "Hold Mouse Buttons To Start",13,10,'$'
+
+P1readyCheck db "P1 : READY" ,13,10,'$'
+P2readyCheck db "P2 : READY",13,10,'$'
 
 
+p1GunDown db "P1 Gun Down",13,10,'$'
+p1GunUp db "P1 Gun Up",13,10,'$'
+
+p1Shot db "P1 Shot.",13,10,'$'
+p2Shot db "P2 Shot.",13,10,'$'
+
+p1Foul db "Foul! P1 Raised Before timer",13,10,'$'
+p2Foul db "Foul! p2 Raised before timer",13,10,'$'
+
+bothDown db "BOTH GUNS DOWN",13,10,'$'
+bothUP db "BOTH GUNS UP",13,10,'$'
+
+p2GunDown db "P2 Gun Down",13,10,'$'
+p2GunUp db "P2 Gun Up",13,10,'$'
+
+stayHolstered db "Keep your guns holstered until timer",13,10,'$'
+startGame db "Start The Game Now!!!!!!!!" ,13,10,'$'
 
 menu db 10,13, "Menu: "   ;menu bar 
      db 10,13, "A.Game Mode "
@@ -1490,8 +1512,6 @@ main proc far
 mov ax,@data
 mov ds,ax ; Initiate data segment
 
-
-
 call cursorToMiddle   ; Center cursor to display message
 
 call clearScreen ; to clear the screen    
@@ -1506,7 +1526,6 @@ call cursorToMiddle   ; Center cursor to display message
 
 call typeNamePone     ; enter name of p1
 
-
 call cursorToMiddle
 call clearScreen ; to clear the screen  
 
@@ -1516,8 +1535,6 @@ mov ah,9
 int 21h
 
 call typeNamePtwo
-
-
 ;----------------------------------TAKING NAMES COMPLETED-----------------------------
 
 
@@ -1646,8 +1663,8 @@ mov BX,0
 ;--------------------b3d ama n5tar b2a tbd2 el l3ba zy keda :
 
 startTheGame:
-  call getP2NameLen
-  call getP1NameLen
+
+
 	mov ax, 4F02h 
 	mov bx, 0100h	
 	INT 10h      	;To Graphics Mode
@@ -1814,11 +1831,6 @@ call foulP1		;lw 7d 3amal foul n2ool
 jmp startRound ;restart the game
 
 skipComp:
-cmp bx,0
-jne skipthisPlease
-jmp startRound
-
-skipthisPlease:
 
 mov ah,2ch
 int 21h    	; nbos 3la el sa3a
@@ -1880,14 +1892,9 @@ int 21h
 pop DX
 pop ax
 
-mov ax,33
-int 33h
-
-cmp bx,0
-jne dontthis
 call drawP1Raised                ; if no buttons are pressed this means that
 call drawP2Raised                ; both guns are held up
-	dontthis:			 ; in that case, both players can fire
+				 ; in that case, both players can fire
 
 
 mov ah,1
@@ -1895,15 +1902,6 @@ int 16h
 
 cmp ah,1eh              ; if letter 'a' not pressed
 jne nextComp            ; next comparison
-
-push ax
-push dx
-mov ah,6
-mov dl,255
-int 21h
-pop DX
-pop ax
-
 call ShootPlayerTwo
 jmp startRound
 
@@ -1916,15 +1914,6 @@ pop DX
 pop ax
 
 nextComp:
-
-push ax
-push dx
-mov ah,6
-mov dl,255
-int 21h
-pop DX
-pop ax
-
 cmp ah,1ch               ; if enter key pressed
 jne skipShooting
 call ShootPlayerOne
@@ -1974,14 +1963,7 @@ p1Down:     ; while LMB is pressed keep displaying
 		    ; this means only player 2 can fire his pistol
 call drawP1Holstered
 call drawP2Raised
-
-;push ax
-;push dx
-;mov ah,6
-;mov dl,255
-;int 21h
-;pop DX
-;pop ax
+;call clearkeyboardbuffer
 
 mov ah,1
 int 16h
@@ -2021,15 +2003,7 @@ p2Down:     ; while RMB is pressed keep displaying
             ; display the both guns down images
 			;this means that only player 1 can fire his pistol
 call drawP2Holstered
-
-;push ax
-;push dx
-;mov ah,6
-;mov dl,255
-;;int 21h
-;pop DX
-;pop ax
-
+;call clearkeyboardbuffer
 call drawP1Raised
 
 
@@ -2069,14 +2043,6 @@ allDown:    ; if both guns are down
 
 call drawP1Holstered
 call drawP2Holstered
-
-push ax
-push dx
-mov ah,6
-mov dl,255
-int 21h
-pop DX
-pop ax
 
 mov ax,3
 int 33h
@@ -2414,15 +2380,7 @@ cursorToMiddle endp
                          
 typeNamePone proc ; moves the cursor to the below middle of the screen and takes input [PLAYER ONE]     
     
-       invalid:
-  mov p1NameLen,0   
-  
-
-;lea dx,enterPoneName  ; print ENTER PLAYER 1
-;mov ah,9
-;int 21h
-
-
+   ; call showCursor
     mov ax,0200h
     mov dx,0920h ; Cursor to bellow middle
     mov bh,0
@@ -2432,30 +2390,30 @@ typeNamePone proc ; moves the cursor to the below middle of the screen and takes
     lea dx,Pname1
     int 21h
     
-    cmp Pname1[2],'A'
-jl invalid
-cmp Pname1[2],'z'
-jg invalid
+    
+    cmp Pname1,41h
+    jl less
+    jg gr8
 
-cmp Pname1[2],'Z'
-jg isLetter?
-jmp tmm
-isLetter?:
+    less:mov ah,2
+    mov dl,8
+    ret
 
-cmp Pname1[2],'a'
-jl invalid
+    gr8:
+    cmp al,7ah
+    jl lesser
+    jg less
 
-tmm:
 
+    lesser:
     
     ret
 typeNamePone endp
 
 typeNamePtwo proc ; moves the cursor to the below middle of the screen and takes input [PLAYER ONE]     
     
- invalid2:
-     ;  mov p2NameLen,0   
-        mov ax,0200h
+   ; call showCursor
+    mov ax,0200h
     mov dx,0920h ; Cursor to bellow middle
     mov bh,0
     int 10h
@@ -2464,21 +2422,6 @@ typeNamePtwo proc ; moves the cursor to the below middle of the screen and takes
     lea dx,Pname2
     int 21h
     
-
-        cmp Pname2[2],'A'
-jl invalid2
-cmp Pname2[2],'z'
-jg invalid2
-
-cmp Pname2[2],'Z'
-jg isLetter2?
-jmp tmm2
-isLetter2?:
-
-cmp Pname2[2],'a'
-jl invalid2
-
-tmm2:
     
     ret
 typeNamePtwo endp
@@ -2901,7 +2844,21 @@ l:ret
 
 ShieldPrompt endp
 
+simulateP1Shot proc
+mov ah,9
+lea dx,p1Shot
+int 21h
 
+ret
+simulateP1Shot endp
+
+simulateP2Shot proc
+mov ah,9
+lea dx,p2Shot
+int 21h
+
+ret
+simulateP2Shot endp
 
 foulP1 proc 
 
@@ -3092,9 +3049,8 @@ Statusbar    PROC
         mov al,0;sub-service 0 all the characters will be in the same color(bl)
         mov bh,0;page number=always zero
         ;Call GameTitle
-                Call PlayerTwoName
         Call PlayerOneName
-
+        Call PlayerTwoName
        ; Call PlayerOneScore
         ;Call PlayerTwoScore
         ;Call PlayerOneStatusBarSheild
@@ -3130,7 +3086,8 @@ PlayerOneName    PROC
         mov bl,01001111b;color of the text (white foreground and black background)
         ;     0000             1111
         ;|_ Background _| |_ Foreground _|
-        mov cx,p1NameLen;length of string
+
+        mov cx,5;length of string
         mov dl, 5  ;Column
         mov dh, 2  ;Row
         mov bp,offset Pname1+2;mov bp the offset of the string
@@ -3139,11 +3096,10 @@ PlayerOneName    PROC
 PlayerOneName endp
 ;-----------Display Player Two Name  -----
 PlayerTwoName    PROC
-      
         mov bl,01011111b;(foreground and background)
         ;     0000             1111
         ;|_ Background _| |_ Foreground _|
-        mov cx,p2NameLen;length of string
+        mov cx,5;length of string
         mov dl, 60  ;Column
         mov dh, 2  ;Row
         mov bp,offset Pname2+2;mov bp the offset of the string
@@ -3442,50 +3398,11 @@ clrp2shield proc
 
 clrp2shield endp
 
-getP1NameLen proc 
+scoreAdjust proc
 
-
-lea si, Pname1+2
-looper:
-inc p1NameLen
-lodsb 
-cmp al,'$'
-jne looper
-
-sub p1NameLen,2
-ret
-getP1NameLen endp 
-
-getP2NameLen proc 
-
-lea si, Pname2+2
-looper2:
-inc p2NameLen
-lodsb 
-cmp al,'$'
-jne looper2
-
-sub p2NameLen,2
-
-ret
-getP2NameLen endp 
-
-adjustNameP2 proc
-mov al,' '
-lea si,Pname2
-stosb
 
 
 ret
-adjustNameP2 endp
-
-adjustNameP1 proc
-mov al,' '
-lea si,Pname2
-stosb
-
-
-ret
-adjustNameP1 endp
+scoreAdjust endp
 
 end main
