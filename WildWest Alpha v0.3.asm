@@ -1880,7 +1880,7 @@ int 21h
 pop DX
 pop ax
 
-mov ax,33
+mov ax,3
 int 33h
 
 cmp bx,0
@@ -1964,7 +1964,8 @@ cmp bx,3    ; if both buttons are pressed
             ; this means that both guns are holestered
 je allDown
 
-jne logic
+cmp bx,0  
+je logic
 
 p1Down:     ; while LMB is pressed keep displaying
             ; the p1 gun down image
@@ -1975,13 +1976,7 @@ p1Down:     ; while LMB is pressed keep displaying
 call drawP1Holstered
 call drawP2Raised
 
-;push ax
-;push dx
-;mov ah,6
-;mov dl,255
-;int 21h
-;pop DX
-;pop ax
+
 
 mov ah,1
 int 16h
@@ -2006,12 +2001,14 @@ int 33h			; Put mouse status in BX
 cmp bx,1
 je p1Down
 
-
+cmp bx,2
+je p2Down
 
 cmp bx,3 
 je allDown
 
-jne logic
+cmp bx,0
+je logic
 
 
 
@@ -2021,14 +2018,6 @@ p2Down:     ; while RMB is pressed keep displaying
             ; display the both guns down images
 			;this means that only player 1 can fire his pistol
 call drawP2Holstered
-
-;push ax
-;push dx
-;mov ah,6
-;mov dl,255
-;;int 21h
-;pop DX
-;pop ax
 
 call drawP1Raised
 
@@ -2054,15 +2043,19 @@ skipShooting3:
 mov ax,3
 int 33h
 
+cmp bx,1
+je p1Down
+
 cmp bx,2
 je p2Down
 
-
-
-cmp bx,3
+cmp bx,3 
 je allDown
 
-jne logic
+cmp bx,0
+je logic
+
+
 
 allDown:    ; if both guns are down
             ; display the both guns down message
@@ -2084,9 +2077,14 @@ int 33h
 cmp bx,3
 je allDown
 
+cmp bx,2
+je p2Down
 
+cmp bx,1
+je p1Down
 
-jmp logic
+cmp bx,0
+je logic
 
 
 
