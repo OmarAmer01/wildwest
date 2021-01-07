@@ -1981,6 +1981,7 @@ cmp ah,39h
 jne skipp2knife1
 cmp byte ptr p2KnifeCount,48
 je skipp2knife1
+call ShootPlayerOneKnife
 call PlayerTwoIncrementScore
 dec p2KnifeCount
 
@@ -1999,6 +2000,7 @@ cmp ah,2ch
 jne skipp1knife1
 cmp p1KnifeCount,48
 je skipp1knife1
+call ShootPlayerTwoKnife
 call PlayerOneIncrementScore
 dec p1KnifeCount
 
@@ -2101,11 +2103,11 @@ call drawP2Raised
 mov ah,1
 int 16h
 
-cmp ah,36h
+cmp ah,39h
 jne skipp2knife
-call ShootPlayerOne
 cmp byte ptr p2KnifeCount,48
 je skipp2knife
+call ShootPlayerOneKnife
 call PlayerTwoIncrementScore
 dec p2KnifeCount
 jmp startRound
@@ -2159,6 +2161,7 @@ cmp ah,2ch
 jne skipp1knife
 cmp p1KnifeCount,48
 je skipp1knife
+call ShootPlayerTwoKnife
 call PlayerOneIncrementScore
 dec p1KnifeCount
 jmp startRound
@@ -3189,7 +3192,7 @@ ShootPlayerOneKnife PROC
         ;---------------------
         SUB bulletTwoXPosition,10        
         CMP bulletTwoXPosition,75
-        JNZ moveKnife2      	   
+        Jae moveKnife2      	   
         ;---------Reset the start position-----
         mov bx,reset
         mov bulletTwoXPosition,bx
