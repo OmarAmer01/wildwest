@@ -109,6 +109,9 @@ imgWholster2 equ 99 ; Player Two width holster
 bulletimgW equ 39
 bulletimgH equ 20
 
+knifeimgW equ 40
+knifeimgH equ 12
+
 
 Xposition DW 30  ;Player One X_Position
 Yposition DW 285 ;Player One Y_Position
@@ -1491,6 +1494,40 @@ p2Holstered DB 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
  DB 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 
  DB 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 
  DB 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+ ;------------------------------------------- Knives -----------------------------------
+knifeimg2 DB 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 28, 26, 25, 24, 23, 151, 222, 150, 174, 24, 24, 27 
+ DB 25, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 21, 18, 17, 17, 185 
+ DB 185, 185, 113, 114, 114, 113, 186, 185, 185, 16, 16, 16, 17, 151, 23, 23, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 
+ DB 0, 0, 0, 0, 0, 17, 6, 42, 43, 43, 43, 43, 44, 44, 44, 44, 44, 44, 44, 44, 43, 43, 42, 116, 115, 188, 18, 20, 25, 29 
+ DB 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 28, 24, 149, 17, 43, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44 
+ DB 44, 44, 44, 43, 6, 116, 16, 16, 16, 23, 0, 0, 26, 152, 24, 0, 29, 26, 154, 246, 200, 17, 16, 185, 114, 17, 116, 44, 6, 116 
+ DB 188, 17, 187, 44, 44, 44, 44, 43, 43, 6, 115, 187, 17, 16, 200, 200, 23, 29, 0, 0, 0, 174, 16, 187, 16, 16, 16, 16, 186, 6 
+ DB 6, 43, 43, 43, 44, 115, 115, 43, 187, 115, 116, 43, 43, 6, 115, 187, 17, 17, 16, 16, 16, 16, 0, 0, 0, 0, 0, 0, 0, 0 
+ DB 23, 16, 42, 44, 44, 43, 43, 44, 43, 6, 44, 44, 43, 116, 44, 43, 18, 44, 43, 116, 115, 187, 17, 200, 128, 23, 27, 0, 0, 0 
+ DB 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 199, 186, 44, 44, 44, 44, 44, 44, 43, 43, 44, 43, 43, 6, 188, 17, 16, 17, 200, 128 
+ DB 24, 28, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 200, 185, 44, 44, 44, 44, 43, 6, 115, 187 
+ DB 16, 16, 17, 223, 153, 25, 29, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 
+ DB 29, 200, 115, 44, 44, 187, 16, 199, 151, 24, 27, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 
+ DB 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 28, 16, 187, 186, 200, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 
+ DB 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 152, 226, 0, 0, 0, 0, 0 
+ DB 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 31, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 
+
+ knifeimg1 DB 0, 0, 0, 0, 0, 0, 0, 0, 0, 25, 27, 24, 24, 174, 150, 222, 151, 23, 24, 25, 26, 28, 0, 0, 0, 0, 0, 0, 0, 0 
+ DB 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 23, 23, 151, 17, 16, 16, 16, 185, 185, 186, 113, 114, 114, 113, 185, 185 
+ DB 185, 17, 17, 18, 21, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 29, 25, 20, 18, 188, 115, 116, 42, 43, 43 
+ DB 44, 44, 44, 44, 44, 44, 44, 44, 43, 43, 43, 43, 42, 6, 17, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 
+ DB 23, 16, 16, 16, 116, 6, 43, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 43, 17, 149, 24, 28, 0, 0 
+ DB 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 29, 23, 200, 200, 16, 17, 187, 115, 6, 43, 43, 44, 44, 44, 44, 187, 17, 188 
+ DB 116, 6, 44, 116, 17, 114, 185, 16, 17, 200, 246, 154, 26, 29, 0, 24, 152, 26, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 16, 16 
+ DB 16, 16, 17, 17, 187, 115, 6, 43, 43, 116, 115, 187, 43, 115, 115, 44, 43, 43, 43, 6, 6, 186, 16, 16, 16, 16, 187, 16, 174, 0 
+ DB 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 27, 23, 128, 200, 17, 187, 115, 116, 43, 44, 18, 43, 44, 116, 43, 44, 44 
+ DB 6, 43, 44, 43, 43, 44, 44, 42, 16, 23, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 28, 24 
+ DB 128, 200, 17, 16, 17, 188, 6, 43, 43, 44, 43, 43, 44, 44, 44, 44, 44, 44, 186, 199, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 
+ DB 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 29, 25, 153, 223, 17, 16, 16, 187, 115, 6, 43, 44, 44, 44, 44, 185, 200 
+ DB 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 27 
+ DB 24, 151, 199, 16, 187, 44, 44, 115, 200, 29, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 
+ DB 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 200, 186, 187, 16, 28, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 
+ DB 0, 0, 0, 0, 0, 0, 0, 0, 0, 31, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 226, 152, 0, 0, 0
 ;------------------------------------------- END DATA SEGMENT --------------------------------------------------
 
 .code
@@ -3110,6 +3147,54 @@ cmp P1HasSheild,1
 
     RET
 ShootPlayerOne ENDP   
+ShootPlayerTwoKnife PROC
+    mov ah,0
+    mov bx,bulletOneXPosition    ;save the original value after shootting 
+    mov reset,bx
+    moveknife1:
+        Call DrawPlayerOneknife
+        ;Delay
+        mov ah,86h
+	    mov cx,0000H
+        mov dx,9999
+        int 15h
+        ;Clear Previous shot
+        mov clearbulletone,1
+        call DrawPlayerOneknife
+        mov clearbulletone,0
+        ;---------------------
+        ADD bulletOneXPosition,10        
+        CMP bulletOneXPosition,495
+        JNZ moveknife1      	   
+        ;---------Reset the start position-----
+        mov bx,reset
+        mov bulletOneXPosition,bx
+    RET
+ShootPlayerTwoKnife ENDP   
+;-------- Player two will shoot player one --------;
+ShootPlayerOneKnife PROC
+    mov bx,bulletTwoXPosition   ;save the original value after shootting 
+    mov reset,bx
+    moveKnife2:
+        Call DrawPlayerTwoKnife
+        ;Delay
+        mov ah,86h
+	    mov cx,0000H
+        mov dx,9999
+        int 15h
+        ;Clear Previous shot
+        mov clearbulletone,1
+        call DrawPlayerTwoKnife
+        mov clearbulletone,0
+        ;---------------------
+        SUB bulletTwoXPosition,10        
+        CMP bulletTwoXPosition,75
+        JNZ moveKnife2      	   
+        ;---------Reset the start position-----
+        mov bx,reset
+        mov bulletTwoXPosition,bx
+    RET
+ShootPlayerOneKnife ENDP
 DrawPlayerOneBullet PROC 
 	       ;mov ax, 4F02h    ;
 	       ;mov bx, 0100h    ; 640x400 screen graphics mode
@@ -3184,6 +3269,79 @@ DrawPlayerTwoBullet PROC
 	ENDINGBullet2:
 	RET
 DrawPlayerTwoBullet ENDP
+DrawPlayerOneknife PROC 
+	       ;mov ax, 4F02h    ;
+	       ;mov bx, 0100h    ; 640x400 screen graphics mode
+	       ;INT 10h      	;execute the configuration
+	       MOV AH,0Bh   	;set the configuration
+	       MOV CX, bulletOneXPosition  	;set the start drawing point 
+	       ADD CX, knifeimgW  	;set the width (X) up to 64 (based on image resolution)
+	       MOV DX, bulletOneYPosition 	;set the hieght (Y) up to 64 (based on image resolution)
+	       ADD DX, knifeimgH 	;set the hieght (Y) up to 64 (based on image resolution)
+		   mov DI, offset knifeimg1  ; to iterate over the pixels
+	       jmp Startknife   	;Avoid drawing before the calculations
+	Drawitknife:
+	       MOV AH,0Ch   	;set the configuration to writing a pixel
+           cmp clearbulletone,1
+           JNZ currentcolorknife 
+           mov al, bgrndcolor        ; color of Background
+           MOV BH,00h   	;set the page number
+	       INT 10h      	;execute the configuration
+           jmp Startknife
+    currentcolorknife: mov al, [DI]      ; color of the current coordinates 
+	       MOV BH,00h   	;set the page number
+	       INT 10h      	;execute the configuration
+	Startknife: 
+		   inc DI
+	       DEC Cx       	;  loop iteration in x direction
+	       cmp Cx,bulletOneXPosition         ;JNZ Drawit      	;  check if we can draw c urrent x and y and excape the y iteration
+	       JNZ Drawitknife
+           ADD Cx, knifeimgW 	;  if loop iteration in y direction, then x should start over so that we sweep the grid
+	       DEC DX       	;  loop iteration in y direction
+	       cmp DX,bulletOneYPosition
+           JZ  ENDINGknife   	;  both x and y reached 00 so end program
+		   Jmp Drawitknife
+
+	ENDINGknife:
+	RET
+DrawPlayerOneknife ENDP
+
+DrawPlayerTwoKnife PROC 
+	       ;mov ax, 4F02h    ;
+	       ;mov bx, 0100h    ; 640x400 screen graphics mode
+	       ;INT 10h      	;execute the configuration
+	       MOV AH,0Bh   	;set the configuration
+	       MOV CX, bulletTwoXPosition  	;set the start drawing point 
+	       ADD CX, knifeimgW  	;set the width (X) up to 64 (based on image resolution)
+	       MOV DX, bulletOneYPosition 	;set the hieght (Y) up to 64 (based on image resolution)
+	       ADD DX, knifeimgH 	;set the hieght (Y) up to 64 (based on image resolution)
+		   mov DI, offset knifeimg2  ; to iterate over the pixels
+	       jmp Startknife2    	;Avoid drawing before the calculations
+	Drawitknife2:
+	       MOV AH,0Ch   	;set the configuration to writing a pixel
+           cmp clearbulletone,1
+           JNZ currentcolorknife2 
+           mov al, bgrndcolor        ; color of Background
+           MOV BH,00h   	;set the page number
+	       INT 10h      	;execute the configuration
+           jmp Startknife2
+    currentcolorknife2: mov al, [DI]      ; color of the current coordinates 
+	       MOV BH,00h   	;set the page number
+	       INT 10h      	;execute the configuration
+	Startknife2: 
+		   inc DI
+	       DEC Cx       	;  loop iteration in x direction
+	       cmp Cx,bulletTwoXPosition         ;JNZ Drawit      	;  check if we can draw c urrent x and y and excape the y iteration
+	       JNZ Drawitknife2
+           ADD Cx, knifeimgW 	;  if loop iteration in y direction, then x should start over so that we sweep the grid
+	       DEC DX       	;  loop iteration in y direction
+	       cmp DX,bulletOneYPosition
+           JZ  ENDINGknife2   	;  both x and y reached 00 so end program
+		   Jmp Drawitknife2
+
+	ENDINGknife2:
+	RET
+DrawPlayerTwoknife ENDP
 
 Statusbar    PROC
 	mov si,@data;moves to si the location in memory of the data segment
