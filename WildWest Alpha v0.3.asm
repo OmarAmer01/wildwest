@@ -3238,7 +3238,7 @@ ShootPlayerTwoKnife PROC
         mov clearbulletone,0
         ;---------------------
         ADD bulletOneXPosition,10        
-        CMP bulletOneXPosition,495
+        CMP bulletOneXPosition,555
         JNZ moveknife1      	   
         ;---------Reset the start position-----
         mov bx,reset
@@ -3262,7 +3262,7 @@ ShootPlayerOneKnife PROC
         mov clearbulletone,0
         ;---------------------
         SUB bulletTwoXPosition,10        
-        CMP bulletTwoXPosition,75
+        CMP bulletTwoXPosition,10
         Jae moveKnife2      	   
         ;---------Reset the start position-----
         mov bx,reset
