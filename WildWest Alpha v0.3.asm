@@ -73,6 +73,15 @@ Level_3 db 10,13,"Level 2 will be implemented in phase 3 $"
 ArrowsSC db 48h,4Bh,50h,4dh 
 wasdSC   db 77h,61h,73h,64h
 
+pknife db "Knives: $ "
+p1KnifeCount db 48,'$'
+p2KnifeCount db 48,'$'
+knifePromptDone db 0
+knifeWaitTime db ?
+knifeWaitTimeInFunc db ?
+knifePerc db 0
+
+
 left  db  17,"$ "
 right db  16,"$ "
 up    db  24,"$ "
@@ -83,6 +92,7 @@ a  db  "a ","$ "
 s  db  "s ","$ "
 d  db  "d ","$ ";shield end
 shieldDone db 0
+
 
 
 ;The following are Graphics related data
@@ -1673,7 +1683,10 @@ Call PlayerTwoScore
 call CLRGameTitle
 call clrPlayerTwoStatusBarSheild
 call clrPlayerOneStatusBarSheild
-
+call p1Knives
+call p2Knives
+call p1Knivescount
+call p2Knivescount
 
 cmp Pscorenum1,47
 jne skipthis
@@ -1691,6 +1704,9 @@ skipthisToo:
 mov P2HasSheild,0
 mov P1HasSheild,0
 mov shieldDone,0
+mov knifePromptDone,0
+
+
 pusha
 
 readyCheck:         ; loop to make sure players have their guns
@@ -1785,12 +1801,25 @@ mov bh,6
 div bh
 add ah,4
 
+
+
 mov waitTime, ah
 sub ah,4
 mov ShieldWaitTime,ah ; time waited before call
 add ah,2
 mov ShieldWaitTimeInFunc,ah ;time inside the call if finished and no one pressed in time no one gets shield
+add ah,1
+mov knifeWaitTime,ah ;time until knife prompt may be called
+add ah,2
+mov knifeWaitTimeInFunc,ah
 
+mov ah,2ch
+int 21h
+mov al,dh
+mov ah,0
+mov bl,2
+div bl
+mov knifePerc,ah ;50% chance for knife to happen each round
 
 foulCheck:
 call drawP1Holstered
@@ -1850,6 +1879,24 @@ skipShield:
 call clrp1shieldprompt
 call clrp2shieldprompt
 
+mov ah,2ch
+int 21h
+sub dh,currSysTime
+cmp dh,knifeWaitTime
+jnz skipKnife
+cmp knifePerc,0
+jz skipKnife
+cmp knifePromptDone,1
+jz skipKnife
+call knifePrompt
+call clrp1shieldprompt
+call clrp2shieldprompt
+call p1Knivescount
+call p2Knivescount
+mov knifePromptDone,1
+add waitTime,4
+skipKnife:
+
 mov ah,2ch ;dh will shange in shield prompt func so redoing time get here
 int 21h
 SUB dh,currSysTime
@@ -1892,6 +1939,42 @@ call drawP2Raised                ; both guns are held up
 
 mov ah,1
 int 16h
+
+cmp ah,39h
+jne skipp2knife1
+cmp byte ptr p2KnifeCount,48
+je skipp2knife1
+call PlayerTwoIncrementScore
+dec p2KnifeCount
+
+push ax
+push dx
+mov ah,6
+mov dl,255
+int 21h
+pop DX
+pop ax
+
+jmp startRound
+skipp2knife1:
+
+cmp ah,2ch
+jne skipp1knife1
+cmp p1KnifeCount,48
+je skipp1knife1
+call PlayerOneIncrementScore
+dec p1KnifeCount
+
+push ax
+push dx
+mov ah,6
+mov dl,255
+int 21h
+pop DX
+pop ax
+
+jmp startRound
+skipp1knife1:
 
 cmp ah,1eh              ; if letter 'a' not pressed
 jne nextComp            ; next comparison
@@ -1981,6 +2064,16 @@ call drawP2Raised
 mov ah,1
 int 16h
 
+cmp ah,36h
+jne skipp2knife
+call ShootPlayerOne
+cmp byte ptr p2KnifeCount,48
+je skipp2knife
+call PlayerTwoIncrementScore
+dec p2KnifeCount
+jmp startRound
+skipp2knife:
+
 cmp ah,1ch
 jne skipShooting2
 call ShootPlayerOne
@@ -2024,6 +2117,15 @@ call drawP1Raised
 
 mov ah,1
 int 16h
+
+cmp ah,2ch
+jne skipp1knife
+cmp p1KnifeCount,48
+je skipp1knife
+call PlayerOneIncrementScore
+dec p1KnifeCount
+jmp startRound
+skipp1knife:
 
 cmp ah,1eh
 jne skipShooting3
@@ -3485,5 +3587,428 @@ stosb
 
 ret
 adjustNameP1 endp
+
+knifePrompt proc
+call clearkeyboardbuffer
+
+mov ax,0200h ;set mouse pos
+mov dx,0605h
+int 10h
+
+
+
+mov ah,9
+lea dx,Prompt
+int 21h
+
+
+
+
+lea di,ArrowsSC
+lea si,wasdSC
+
+mov ah,2ch
+int 21h
+mov ax,dx
+mov dx,0
+mov ah,0
+mov bl,4
+div bl      ; do calculations based on system time
+
+cmp ah,0
+jz kpup
+cmp ah,1
+jz kpleft
+cmp ah,2
+jz kpdown
+cmp ah,3
+jz kpright
+
+kpup: mov ah,9
+lea dx,w
+int 21h
+
+mov ax,0200h ;set mouse pos
+mov dx,068Ch
+int 10h
+
+mov ah,9
+lea dx,Prompt
+int 21h
+
+mov ah,9
+lea dx,up
+int 21h
+
+
+
+jmp kcheck1
+kclr1:call clearkeyboardbuffer
+
+kcheck1:
+mov ah,2ch 
+int 21h
+SUB dh,currSysTime
+cmp dh,KnifeWaitTimeInFunc
+jne kskipsp1
+ret
+kskipsp1:
+
+call drawP1Holstered
+call drawP2Holstered
+
+mov ax,3
+int 33h 		; get mouse button status
+
+cmp bx,1
+jne knextCompare1
+call foulP2		;lw 7d 3amal foul n2ool
+jmp startRound  ;restart the game
+
+knextCompare1:
+
+cmp bx,2
+
+jne kskipComp1
+
+call foulP1		;lw 7d 3amal foul n2ool
+jmp startRound ;restart the game
+
+kskipComp1:
+
+mov ax,0
+mov ah,1h
+int 16h
+jz kcheck1
+
+
+add di,0
+cmp ah, 48h
+jnz kskip1
+inc p2KnifeCount
+; mov ah,9
+; lea dx,P1HasSheildPrompt
+; int 21h
+jmp kl
+kskip1:add si,0
+cmp al,77h
+jnz kclr1
+inc p1KnifeCount
+; mov ah,9
+; lea dx,P2HasSheildPrompt
+; int 21h
+jmp kl
+
+kpleft:mov ah,9
+lea dx,a
+int 21h
+
+mov ax,0200h ;set mouse pos
+mov dx,068Ch
+int 10h
+
+mov ah,9
+lea dx,Prompt
+int 21h
+
+mov ah,9
+lea dx,left
+int 21h
+
+
+
+jmp kcheck2
+kclr2:call clearkeyboardbuffer
+
+kcheck2:
+mov ah,2ch 
+int 21h
+SUB dh,currSysTime
+cmp dh,KnifeWaitTimeInFunc
+jne kskipsp2
+ret
+kskipsp2:
+
+call drawP1Holstered
+call drawP2Holstered
+
+mov ax,3
+int 33h 		; get mouse button status
+
+cmp bx,1
+jne knextCompare2
+call foulP2		;lw 7d 3amal foul n2ool
+jmp startRound  ;restart the game
+
+knextCompare2:
+
+cmp bx,2
+
+jne kskipComp2
+
+call foulP1		;lw 7d 3amal foul n2ool
+jmp startRound ;restart the game
+
+kskipComp2:
+
+mov ax,0
+mov ah,1h
+int 16h
+jz kcheck2
+
+
+add di,0
+cmp ah, 4Bh
+jnz kskip2
+inc p2KnifeCount
+; mov ah,9
+; lea dx,P1HasSheildPrompt
+; int 21h
+jmp kl
+kskip2:;add si,1
+cmp al,61h
+jnz kclr2
+inc p1KnifeCount
+; mov ah,9
+; lea dx,P2HasSheildPrompt
+; int 21h
+jmp kl
+
+
+
+kl1:jmp kl
+
+kpdown: mov ah,9
+lea dx,s
+int 21h
+
+mov ax,0200h ;set mouse pos
+mov dx,068Ch
+int 10h
+
+mov ah,9
+lea dx,Prompt
+int 21h
+
+mov ah,9
+lea dx,down
+int 21h
+
+
+
+jmp kcheck3
+kclr3:call clearkeyboardbuffer
+
+kcheck3:
+mov ah,2ch 
+int 21h
+SUB dh,currSysTime
+cmp dh,KnifeWaitTimeInFunc
+jne kskipsp3
+ret
+kskipsp3:
+
+call drawP1Holstered
+call drawP2Holstered
+
+mov ax,3
+int 33h 		; get mouse button status
+
+cmp bx,1
+jne knextCompare3
+call foulP2		;lw 7d 3amal foul n2ool
+jmp startRound  ;restart the game
+
+knextCompare3:
+
+cmp bx,2
+
+jne kskipComp3
+
+call foulP1		;lw 7d 3amal foul n2ool
+jmp startRound ;restart the game
+
+kskipComp3:
+
+mov ax,0
+mov ah,1h
+int 16h
+jz kcheck3
+
+
+add di,0
+cmp ah, 50h
+jnz kskip3
+inc p2KnifeCount
+; mov ah,9
+; lea dx,P1HasSheildPrompt
+; int 21h
+jmp kl
+kskip3:add si,2
+cmp al,73h
+jnz kclr1
+inc p1KnifeCount
+; mov ah,9
+; lea dx,P2HasSheildPrompt
+; int 21h
+jmp kl
+
+
+
+
+kpright:mov ah,9
+lea dx,d
+int 21h
+
+mov ax,0200h ;set mouse pos
+mov dx,068Ch
+int 10h
+
+mov ah,9
+lea dx,Prompt
+int 21h
+
+mov ah,9
+lea dx,right
+int 21h
+
+
+
+jmp kcheck4
+kclr4:call clearkeyboardbuffer
+
+kcheck4:
+mov ah,2ch 
+int 21h
+SUB dh,currSysTime
+cmp dh,KnifeWaitTimeInFunc
+jne kskipsp4
+ret
+kskipsp4:
+
+call drawP1Holstered
+call drawP2Holstered
+
+mov ax,3
+int 33h 		; get mouse button status
+
+cmp bx,1
+jne knextCompare4
+call foulP2		;lw 7d 3amal foul n2ool
+jmp startRound  ;restart the game
+
+knextCompare4:
+
+cmp bx,2
+
+jne kskipComp4
+
+call foulP1		;lw 7d 3amal foul n2ool
+jmp startRound ;restart the game
+
+kskipComp4:
+
+mov ax,0
+mov ah,1h
+int 16h
+jz kcheck4
+
+
+add di,0
+cmp ah, 4Dh
+jnz kskip4
+inc p2KnifeCount
+; mov ah,9
+; lea dx,P1HasSheildPrompt
+; int 21h
+jmp kl
+kskip4:add si,3
+cmp al,64h
+jnz kclr4
+inc p1KnifeCount
+; mov ah,9
+; lea dx,P2HasSheildPrompt
+; int 21h
+jmp kl
+
+kl:ret
+
+knifePrompt endp
+
+p1Knives proc
+        mov si,@data;moves to si the location in memory of the data segment
+        mov es,si;moves to es the location in memory of the data segment
+        mov ah,13h;service to print string in graphic mode
+        mov al,0;sub-service 0 all the characters will be in the same color(bl)
+        mov bh,0;page number=always zero
+
+        mov bl,01001111b;(foreground and background)
+        ;     0000             1111
+        ;|_ Background _| |_ Foreground _|
+        mov cx,8;length of string
+        mov dl, 05   ;Column
+        mov dh, 5  ;Row
+        mov bp,offset pknife;mov bp the offset of the string
+        int 10h
+
+        
+        RET
+
+p1Knives endp
+
+p2Knives proc
+
+        mov si,@data;moves to si the location in memory of the data segment
+        mov es,si;moves to es the location in memory of the data segment
+        mov ah,13h;service to print string in graphic mode
+        mov al,0;sub-service 0 all the characters will be in the same color(bl)
+        mov bh,0;page number=always zero
+
+        mov bl,01011111b;(foreground and background)
+        ;     0000             1111
+        ;|_ Background _| |_ Foreground _|
+        mov cx,8;length of string
+        mov dl, 60   ;Column
+        mov dh, 5  ;Row
+        mov bp,offset pknife;mov bp the offset of the string
+        int 10h
+        RET
+
+p2Knives endp
+
+p1Knivescount proc
+
+        mov si,@data;moves to si the location in memory of the data segment
+        mov es,si;moves to es the location in memory of the data segment
+        mov ah,13h;service to print string in graphic mode
+        mov al,0;sub-service 0 all the characters will be in the same color(bl)
+        mov bh,0;page number=always zero
+        mov bl,01001111b;(foreground and background)
+        mov cx,1;length of string
+        mov dl, 13   ;Column
+        mov dh, 5  ;Row
+        mov bp,offset p1KnifeCount;mov bp the offset of the string
+        int 10h
+        ret
+p1Knivescount endp
+
+
+p2Knivescount proc
+
+        mov si,@data;moves to si the location in memory of the data segment
+        mov es,si;moves to es the location in memory of the data segment
+        mov ah,13h;service to print string in graphic mode
+        mov al,0;sub-service 0 all the characters will be in the same color(bl)
+        mov bh,0;page number=always zero
+        mov bl,01011111b;(foreground and background)
+        mov cx,1;length of string
+        mov dl, 68   ;Column
+        mov dh, 5  ;Row
+        mov bp,offset p2KnifeCount;mov bp the offset of the string
+        int 10h
+        ret
+p2Knivescount endp
+
+
 
 end main
