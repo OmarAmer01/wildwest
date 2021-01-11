@@ -11,9 +11,9 @@ Gtitle db 'The Wild West : Start Shooting! ','$'
 readystatement db 'Hold both mouse buttons to start!','$'
 missedshot db 'Foul!','$'
 Pname1 db 16,?,30 dup ('$')
-p1NameLen db 0,'$'
+p1NameLen dw 0,'$'
 Pname2 db 16,?,30 dup ('$')
-p2NameLen db 0,'$'
+p2NameLen dw 0,'$'
 Pscore1 db 'Score:','$'
 Pscore2 db 'Score:','$'
 
@@ -81,6 +81,7 @@ knifeWaitTime db ?
 knifeWaitTimeInFunc db ?
 knifePerc db 0
 
+lvl db 0
 
 left  db  17,"$ "
 right db  16,"$ "
@@ -1746,6 +1747,7 @@ skip_3:
     
 cmp al,98 ; check for enter letter of b to go to level 2 of game mode
 jnz skip_4  
+mov lvl,2
 ;-----------clearscreen------------------------- 
 MOV AX,0600H    ;06 TO SCROLL & 00 FOR FULLJ SCREEN
 MOV BH,71H    ;ATTRIBUTE 7 FOR BACKGROUND AND 1 FOR FOREGROUND
@@ -1753,6 +1755,7 @@ MOV CX,0000H    ;STARTING COORDINATES
 MOV DX,184FH    ;ENDING COORDINATES
 INT 10H        ;FOR VIDEO DISPLAY
 ;----------------------------------------------------    
+jmp startTheGame
 
 mov ah,9  ;Printing "Level 2 is on " massage
 mov dx,offset Level_3
@@ -1834,6 +1837,8 @@ call PlayerTwoIncrementScore
 skipthisToo:
 
 ;------------------------------------Start Ready Check--------------------------------
+
+call clrRdisp
 
 mov P2HasSheild,0
 mov P1HasSheild,0
@@ -2071,6 +2076,7 @@ call drawP2Raised                ; both guns are held up
 	dontthis:			 ; in that case, both players can fire
 
 
+
 mov ah,1
 int 16h
 
@@ -2111,6 +2117,11 @@ pop ax
 
 jmp startRound
 skipp1knife1:
+
+cmp lvl,2
+jnz skiplvl2
+call riddle
+skiplvl2:
 
 cmp ah,1eh              ; if letter 'a' not pressed
 jne nextComp            ; next comparison
@@ -2301,6 +2312,8 @@ allDown:    ; if both guns are down
 
 call drawP1Holstered
 call drawP2Holstered
+
+
 
 push ax
 push dx
@@ -3488,7 +3501,7 @@ PlayerOneName    PROC
         mov bl,01001111b;color of the text (white foreground and black background)
         ;     0000             1111
         ;|_ Background _| |_ Foreground _|
-        mov cl,p1NameLen;length of string
+        mov cx,p1NameLen;length of string
         mov dl, 5  ;Column
         mov dh, 2  ;Row
         mov bp,offset Pname1+2;mov bp the offset of the string
@@ -3501,7 +3514,7 @@ PlayerTwoName    PROC
         mov bl,01011111b;(foreground and background)
         ;     0000             1111
         ;|_ Background _| |_ Foreground _|
-        mov cl,p2NameLen;length of string
+        mov cx,p2NameLen;length of string
         mov dl, 60  ;Column
         mov dh, 2  ;Row
         mov bp,offset Pname2+2;mov bp the offset of the string
@@ -4296,7 +4309,7 @@ loop findq
         mov ah,13h;service to print string in graphic mode
         mov al,0;sub-service 0 all the characters will be in the same color(bl)
         mov bh,0;page number=always zero
-        mov bl,01011111b;(foreground and background)
+        mov bl,00001100b;(foreground and background)
         mov cx,7;length of string
         mov dl, 34   ;Column
         mov dh, 8  ;Row
@@ -4316,11 +4329,14 @@ div bx
 mov AnsNum,dl
 mov bx,0
 
-lea di,RandAns1
+MOV CH,0
 mov cl,QuesNum
+mov di,0
+lea di,RandAns1
 findans: add di,20
 loop findans
 
+add di,4
 call dispa1
 add di,4
 call dispa2
@@ -4328,40 +4344,7 @@ add di,4
 call dispa3
 add di,4
 call dispa4
-add di,4
 
-; mov AnsOffset,di
-; add di,4
-
-; typeAns:
-;         mov si,@data;moves to si the location in memory of the data segment
-;         mov es,si;moves to es the location in memory of the data segment
-;         mov ah,13h;service to print string in graphic mode
-;         mov al,0;sub-service 0 all the characters will be in the same color(bl)
-;         mov bh,0;page number=always zero
-;         mov bl,01011111b;(foreground and background)
-;         mov cx,3;length of string
-;         mov dl, 26   ;Column
-;         mov dh, 8  ;Row
-;         add di,4
-;         mov cl,AnsNum
-;         cmp lprintAns,cl
-
-;         jnz skiprand
-;         mov cx,3
-;         mov bp,AnsOffset
-;         int 10h
-;         add dl,6
-;         inc lprintAns
-;         cmp lprintAns,4
-; jnz typeAns
-;         skiprand:mov cx,3
-;         mov bp,di;mov bp the offset of the string        
-;         int 10h
-;         add dl,6
-;         inc lprintAns
-;         cmp lprintAns,4
-; jnz typeAns
 
 lea di,wasdSC
 lea si,ArrowsSC
@@ -4377,16 +4360,53 @@ checkriddle:
         int 16h
         jz checkriddle
 
-cmp ah,byte ptr [di]
-call ShootPlayerOne
-jmp startRound
+cmp al,byte ptr [di]
 jnz sc1
-sc1:
-cmp ah,byte ptr [si]
 call ShootPlayerTwo
 jmp startRound
+sc1:
+cmp ah,byte ptr [si]
 jnz sc2
-sc2:jmp cr
+call ShootPlayerOne
+jmp startRound
+sc2:
+cmp ah,39h
+jne skipp2knife11
+cmp byte ptr p2KnifeCount,48
+je skipp2knife11
+call ShootPlayerOneKnife
+call PlayerTwoIncrementScore
+dec p2KnifeCount
+
+push ax
+push dx
+mov ah,6
+mov dl,255
+int 21h
+pop DX
+pop ax
+
+jmp startRound
+skipp2knife11:
+
+cmp ah,2ch
+jne skipp1knife11
+cmp p1KnifeCount,48
+je skipp1knife11
+call ShootPlayerTwoKnife
+call PlayerOneIncrementScore
+dec p1KnifeCount
+
+push ax
+push dx
+mov ah,6
+mov dl,255
+int 21h
+pop DX
+pop ax
+
+jmp startRound
+skipp1knife11:jmp cr
 ret
 riddle endp
 
@@ -4397,17 +4417,33 @@ dispa1 proc
         mov ah,13h;service to print string in graphic mode
         mov al,0;sub-service 0 all the characters will be in the same color(bl)
         mov bh,0;page number=always zero
-        mov bl,01011111b;(foreground and background)
+        mov bl,00001100b;(foreground and background)
         mov cx,1;length of string
         mov dl, 26   ;Column
-        mov dh, 8  ;Row
+        mov dh, 9  ;Row
         mov bp,offset up
         int 10h
+        mov si,@data
         mov es,si
-        add dl,1
+        mov ah,13h;service to print string in graphic mode
+        mov al,0;sub-service 0 all the characters will be in the same color(bl)
+        mov bh,0;page number=always zero
+        mov bl,00001100b;(foreground and background)
+        mov dl, 27   ;Column
+        mov dh, 9  ;Row
+        cmp AnsNum,0
+        jnz skiprd1
+        sub di,4
         mov cx,3
-        mov bp,di
+        mov bp, di
+        add di,4
         int 10h
+        ret
+        skiprd1:
+        mov cx,3
+        mov bp, di
+        int 10h
+        ret
 dispa1 endp
 
 dispa2 proc
@@ -4417,17 +4453,28 @@ dispa2 proc
         mov ah,13h;service to print string in graphic mode
         mov al,0;sub-service 0 all the characters will be in the same color(bl)
         mov bh,0;page number=always zero
-        mov bl,01011111b;(foreground and background)
+        mov bl,00001100b;(foreground and background)
         mov cx,1;length of string
         mov dl, 31   ;Column
-        mov dh, 8  ;Row
+        mov dh, 9  ;Row
         mov bp,offset left
         int 10h
+        mov si,@data
         mov es,si
         add dl,1
+        cmp AnsNum,1
+        jnz skiprd2
+        sub di,8
+        mov cx,3
+        mov bp, di
+        add di,8
+        int 10h
+        ret
+        skiprd2:
         mov cx,3
         mov bp,di
         int 10h
+        ret
 dispa2 endp
 
 dispa3 proc
@@ -4437,17 +4484,28 @@ dispa3 proc
         mov ah,13h;service to print string in graphic mode
         mov al,0;sub-service 0 all the characters will be in the same color(bl)
         mov bh,0;page number=always zero
-        mov bl,01011111b;(foreground and background)
+        mov bl,00001100b;(foreground and background)
         mov cx,1;length of string
         mov dl, 36   ;Column
-        mov dh, 8  ;Row
+        mov dh, 9  ;Row
         mov bp,offset down
         int 10h
+        mov si,@data
         mov es,si
         add dl,1
+        cmp AnsNum,2
+        jnz skiprd3
+        sub di,12
+        mov cx,3
+        mov bp, di
+        add di,12
+        int 10h
+        ret
+        skiprd3:
         mov cx,3
         mov bp,di
         int 10h
+        ret
 dispa3 endp
 
 dispa4 proc
@@ -4457,16 +4515,54 @@ dispa4 proc
         mov ah,13h;service to print string in graphic mode
         mov al,0;sub-service 0 all the characters will be in the same color(bl)
         mov bh,0;page number=always zero
-        mov bl,01011111b;(foreground and background)
+        mov bl,00001100b;(foreground and background)
         mov cx,1;length of string
         mov dl, 41   ;Column
-        mov dh, 8  ;Row
+        mov dh, 9  ;Row
         mov bp,offset right
         int 10h
+        mov si,@data
         mov es,si
         add dl,1
+        cmp AnsNum,3
+        jnz skiprd4
+        sub di,16
+        mov cx,3
+        mov bp, di
+        add di,16
+        int 10h
+        ret
+        skiprd4:
         mov cx,3
         mov bp,di
         int 10h
+        ret
 dispa4 endp
+
+clrRdisp proc
+        mov si,@data;moves to si the location in memory of the data segment
+        mov es,si;moves to es the location in memory of the data segment
+        mov ah,13h;service to print string in graphic mode
+        mov al,0;sub-service 0 all the characters will be in the same color(bl)
+        mov bh,0;page number=always zero
+        mov bl,clrColor;(foreground and background)
+        mov cx,10;length of string
+        mov dl, 34   ;Column
+        mov dh, 8  ;Row
+        mov bp,offset RandAns1
+        int 10h
+
+        mov si,@data;moves to si the location in memory of the data segment
+        mov es,si;moves to es the location in memory of the data segment
+        mov ah,13h;service to print string in graphic mode
+        mov al,0;sub-service 0 all the characters will be in the same color(bl)
+        mov bh,0;page number=always zero
+        mov bl,clrColor;(foreground and background)
+        mov cx,25;length of string
+        mov dl, 26   ;Column
+        mov dh, 9  ;Row
+        mov bp,offset RandAns1
+        int 10h
+        ret
+clrRdisp endp
 end main
