@@ -93,8 +93,34 @@ s  db  "s ","$ "
 d  db  "d ","$ ";shield end
 shieldDone db 0
 
+question1  db "60 $" , "12 * 5  $ " ;answer,question
+question2  db "24 $" , "3 * 8   $ "
+question3  db "31 $" , "13 + 18 $ "
+question4  db "135$" , "9 * 15  $ "
+question5  db "64 $" , "8 * 8   $ "
+question6  db "50 $" , "34 + 16 $ "
+question7  db "144$" , "12 * 12 $ "
+question8  db "3  $" , "12 / 4  $ "
+question9  db "15 $" , "90 / 6  $ "
+question10 db "8  $" , "64 / 8  $ "
+
+RandAns1  db "60 $","64 $","56 $","62 $","58 $"
+RandAns2  db "24 $","20 $","22 $","18 $","16 $"
+RandAns3  db "31 $","30 $","34 $","29 $","33 $"
+RandAns4  db "135$","130$","140$","125$","120$"
+RandAns5  db "64 $","60 $","66 $","62 $","58 $"
+RandAns6  db "50 $","46 $","48 $","54 $","52 $"
+RandAns7  db "144$","140$","142$","138$","136$"
+RandAns8  db "3  $","2  $","4  $","1  $","5  $"
+RandAns9  db "15 $","14 $","13 $","17 $","12 $"
+RandAns10 db "8  $","4  $","6  $","10 $","7  $"
 
 
+mcq db 0,0,0,0
+AnsNum db 0
+AnsOffset dw ?
+QuesNum db 0
+lprintAns db 0
 ;The following are Graphics related data
 
 ;The following are Graphics related data
@@ -1647,7 +1673,7 @@ MOV AX,0600H    ;06 TO SCROLL & 00 FOR FULL SCREEN
 MOV BH,07h    ;ATTRIBUTE 7 FOR BACKGROUND AND 1 FOR FOREGROUND
 MOV CX,0000H    ;STARTING COORDINATES
 MOV DX,184FH    ;ENDING COORDINATES
-INT 10H        ;FOR VIDEO DISPLAY
+INT 10H        ;FOR z DISPLAY
 recheck:
 mov cx,0
 mov dh, 0ah ;row
@@ -1674,7 +1700,7 @@ MOV AX,0600H    ;06 TO SCROLL & 00 FOR FULL SCREEN
 MOV BH,07H    ;ATTRIBUTE 7 FOR BACKGROUND AND 1 FOR FOREGROUND
 MOV CX,0000H    ;STARTING COORDINATES
 MOV DX,184FH    ;ENDING COORDINATES
-INT 10H        ;FOR VIDEO DISPLAY
+INT 10H        ;FOR DISPLAY
 ;----------------------------------------------------    
 
 mov cx,0
@@ -4241,6 +4267,206 @@ p2Knivescount proc
         ret
 p2Knivescount endp
 
+riddle proc
+
+lea di,question1
+; lea si,mcq
+
+; mov cx,4
+; ResetMcq:mov [si],0
+; inc si
+; loop ResetMcq
+
+mov ah,2ch ;get time to randomize question
+int 21h
+
+mov ax,dx
+mov dx,0
+mov bx,10
+div bx
+
+mov QuesNum,dl
+mov cx,dx
+
+findq:add di,14 ;find the randomized question
+loop findq
+        ;type question
+        mov si,@data;moves to si the location in memory of the data segment
+        mov es,si;moves to es the location in memory of the data segment
+        mov ah,13h;service to print string in graphic mode
+        mov al,0;sub-service 0 all the characters will be in the same color(bl)
+        mov bh,0;page number=always zero
+        mov bl,01011111b;(foreground and background)
+        mov cx,7;length of string
+        mov dl, 34   ;Column
+        mov dh, 8  ;Row
+        add di,4
+        mov bp,di;mov bp the offset of the string
+        sub di,4
+        int 10h
 
 
+mov ah,2ch ;get time to randomize answer position
+int 21h
+
+mov ax,dx
+mov dx,0
+mov bx,4
+div bx
+mov AnsNum,dl
+mov bx,0
+
+lea di,RandAns1
+mov cl,QuesNum
+findans: add di,20
+loop findans
+
+call dispa1
+add di,4
+call dispa2
+add di,4
+call dispa3
+add di,4
+call dispa4
+add di,4
+
+; mov AnsOffset,di
+; add di,4
+
+; typeAns:
+;         mov si,@data;moves to si the location in memory of the data segment
+;         mov es,si;moves to es the location in memory of the data segment
+;         mov ah,13h;service to print string in graphic mode
+;         mov al,0;sub-service 0 all the characters will be in the same color(bl)
+;         mov bh,0;page number=always zero
+;         mov bl,01011111b;(foreground and background)
+;         mov cx,3;length of string
+;         mov dl, 26   ;Column
+;         mov dh, 8  ;Row
+;         add di,4
+;         mov cl,AnsNum
+;         cmp lprintAns,cl
+
+;         jnz skiprand
+;         mov cx,3
+;         mov bp,AnsOffset
+;         int 10h
+;         add dl,6
+;         inc lprintAns
+;         cmp lprintAns,4
+; jnz typeAns
+;         skiprand:mov cx,3
+;         mov bp,di;mov bp the offset of the string        
+;         int 10h
+;         add dl,6
+;         inc lprintAns
+;         cmp lprintAns,4
+; jnz typeAns
+
+lea di,wasdSC
+lea si,ArrowsSC
+
+mov cl,AnsNum
+arrwasd:inc di
+inc si
+loop arrwasd
+
+cr: call clearkeyboardbuffer
+checkriddle:
+        mov ah,1
+        int 16h
+        jz checkriddle
+
+cmp ah,byte ptr [di]
+call ShootPlayerOne
+jmp startRound
+jnz sc1
+sc1:
+cmp ah,byte ptr [si]
+call ShootPlayerTwo
+jmp startRound
+jnz sc2
+sc2:jmp cr
+ret
+riddle endp
+
+dispa1 proc
+
+        mov si,@data;moves to si the location in memory of the data segment
+        mov es,si;moves to es the location in memory of the data segment
+        mov ah,13h;service to print string in graphic mode
+        mov al,0;sub-service 0 all the characters will be in the same color(bl)
+        mov bh,0;page number=always zero
+        mov bl,01011111b;(foreground and background)
+        mov cx,1;length of string
+        mov dl, 26   ;Column
+        mov dh, 8  ;Row
+        mov bp,offset up
+        int 10h
+        mov es,si
+        add dl,1
+        mov cx,3
+        mov bp,di
+        int 10h
+dispa1 endp
+
+dispa2 proc
+
+        mov si,@data;moves to si the location in memory of the data segment
+        mov es,si;moves to es the location in memory of the data segment
+        mov ah,13h;service to print string in graphic mode
+        mov al,0;sub-service 0 all the characters will be in the same color(bl)
+        mov bh,0;page number=always zero
+        mov bl,01011111b;(foreground and background)
+        mov cx,1;length of string
+        mov dl, 31   ;Column
+        mov dh, 8  ;Row
+        mov bp,offset left
+        int 10h
+        mov es,si
+        add dl,1
+        mov cx,3
+        mov bp,di
+        int 10h
+dispa2 endp
+
+dispa3 proc
+
+        mov si,@data;moves to si the location in memory of the data segment
+        mov es,si;moves to es the location in memory of the data segment
+        mov ah,13h;service to print string in graphic mode
+        mov al,0;sub-service 0 all the characters will be in the same color(bl)
+        mov bh,0;page number=always zero
+        mov bl,01011111b;(foreground and background)
+        mov cx,1;length of string
+        mov dl, 36   ;Column
+        mov dh, 8  ;Row
+        mov bp,offset down
+        int 10h
+        mov es,si
+        add dl,1
+        mov cx,3
+        mov bp,di
+        int 10h
+dispa3 endp
+
+dispa4 proc
+
+        mov si,@data;moves to si the location in memory of the data segment
+        mov es,si;moves to es the location in memory of the data segment
+        mov ah,13h;service to print string in graphic mode
+        mov al,0;sub-service 0 all the characters will be in the same color(bl)
+        mov bh,0;page number=always zero
+        mov bl,01011111b;(foreground and background)
+        mov cx,1;length of string
+        mov dl, 41   ;Column
+        mov dh, 8  ;Row
+        mov bp,offset right
+        int 10h
+        mov es,si
+        add dl,1
+        mov cx,3
+        mov bp,di
+        int 10h
+dispa4 endp
 end main
