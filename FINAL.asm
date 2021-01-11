@@ -59,8 +59,8 @@ P2HasSheild db 0d
 ShieldWaitTime db ?
 ShieldWaitTimeInFunc db ?
 
-invite db "Invite recieved press a to play $"
-
+InviteREC db "Invite recieved press a to play $"
+inviteSent db "Invite Sent Please Wait $"
 
 menu db 10,13, "Menu: "   ;menu bar 
      db 10,13, "A.Game Mode "
@@ -1748,15 +1748,17 @@ mov gotInvitedToChat,1
 
 haveGameInvRecieced:
 mov gotInvitedToGame,1
+
 mov ah,9
-lea dx,invite
+lea dx,InviteREC
 int 21h
+
 ;wait user press
 mov ah,0
 int 21h
 
 cmp al,3ch
-jmp startTheGame
+je startTheGame
 
 jmp inviteChecker
 
@@ -1767,15 +1769,15 @@ int 16h
 
 jz inviteChecker
 
-cmp al,3bh
+cmp ah,3bh
 je goChat
-cmp al,3ch
+cmp ah,3ch
 je goPlay
 jne sendPrompt
 	
 goPlay:
-mov ah,2
-mov dx,'P'
+mov ah,9
+mov dx, offset inviteSent
 int 21h
 
 		mov dx , 3FDH		; Line Status Register
@@ -1787,6 +1789,20 @@ AGAINaaa:  	In al , dx 			;Read Line Status
   		mov dx , 3F8H		; Transmit data register
   		mov  al,3ch
   		out dx , al 
+
+;now we take serial input n4of el tanny 3ayz yl3b wla l2		
+	mov dx , 3FDH		; Line Status Register
+	CHKxxx:	in al , dx 
+  		AND al , 1
+  		JZ CHKxxx
+
+                mov dx , 03F8H
+  		in al , dx 
+  	cmp al,3ch
+          je startTheGame
+
+
+
 
 goChat:
 mov ah,2
@@ -1819,7 +1835,7 @@ in al,dx
 
 cmp al,1
 jne move
-lea dx,invite
+lea dx,InviteREC
 mov ah,9
 int 21h
 move:
