@@ -11,9 +11,9 @@ Gtitle db 'The Wild West : Start Shooting! ','$'
 readystatement db 'Hold both mouse buttons to start!','$'
 missedshot db 'Foul!','$'
 Pname1 db 16,?,30 dup ('$')
-p1NameLen dw 0,'$'
+p1NameLen db 0,'$'
 Pname2 db 16,?,30 dup ('$')
-p2NameLen dw 0,'$'
+p2NameLen db 0,'$'
 Pscore1 db 'Score:','$'
 Pscore2 db 'Score:','$'
 
@@ -3488,7 +3488,7 @@ PlayerOneName    PROC
         mov bl,01001111b;color of the text (white foreground and black background)
         ;     0000             1111
         ;|_ Background _| |_ Foreground _|
-        mov cx,p1NameLen;length of string
+        mov cl,p1NameLen;length of string
         mov dl, 5  ;Column
         mov dh, 2  ;Row
         mov bp,offset Pname1+2;mov bp the offset of the string
@@ -3501,7 +3501,7 @@ PlayerTwoName    PROC
         mov bl,01011111b;(foreground and background)
         ;     0000             1111
         ;|_ Background _| |_ Foreground _|
-        mov cx,p2NameLen;length of string
+        mov cl,p2NameLen;length of string
         mov dl, 60  ;Column
         mov dh, 2  ;Row
         mov bp,offset Pname2+2;mov bp the offset of the string

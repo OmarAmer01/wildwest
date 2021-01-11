@@ -6,7 +6,7 @@
 			; w by3ml kol 7aga a7sn meno
 .stack 64
 .data
-gameLeader db 0h ;game leader y3ny ele ba3at el awal
+takingNamesDone db 0h ;game leader y3ny ele ba3at el awal
                  ; lw howa el leader yb2a de htb2a equal 69
                  ; lw l2 h2ba zero zay ma heya
 Gtitle db 'The Wild West : Start Shooting! ','$'
@@ -1629,67 +1629,73 @@ call typeNamePone     ; enter name of p1
 call getP1NameLen
 
 
+;Check that Transmitter Holding Register is Empty
+
+;mov dx , 3FDH ; Line Status Register
+;AGAIN: In al , dx ;Read Line Status
+;test al , 00100000b
+;JZ AGAIN ;Not empty
+;;If empty put the VALUE in Transmit data register
+;mov dx , 3F8H ; Transmit data register
+;mov ax,p1NameLen
+;out dx , ax
+
+;Check that Data is Ready
+
+;mov dx , 3FDH ; Line Status Register
+
+;CHK: in al , dx
+;test al , 1
+;JZ CHK ;Not Ready
 
 
+;mov dx , 03F8H
+;in ax , dx
+;mov p2NameLen , ax
 
-		mov dx , 3FDH		; Line Status Register
-AGAIN:  	In al , dx 		;Read Line Status
-  		AND al , 00100000b
-  		JZ AGAIN                ; we exit this loop lw ynf3 nb3t data
-;------------------------------------------------------------------ L7AD HENA EL GHAZEN bY3MLO EL CODE at the same point of time. 
-                                                                    ; ELE YFR2 MABNHOM BS HOWA MEEN ELE KATAB ESMO EL AWAL
-                                                                    ; AHA WALAHI dh el fr2
-                                                                    ;wa7ed fehom howa el leader
-                                                                    ; el tany listener
-                                                                    ; 3AYZEEN N3RF MEEN ELE BADA2 EL KALAM
-
-                mov dx , 03F8H
-  		out al , dx 
-  		mov gameLeader , 69h
-
-                  cmp gameLeader,69h
-                  je skipT
+mov dx , 3FDH ; Line Status Register
+AGAINx: In al , dx ;Read Line Status
+test al , 00100000b
+JZ AGAINx ;Not empty
 
 
-                mov dx , 3F8H		; we send to the other pc that we are player one
-  		mov  al,69h             ; yes 69h is the code for "we are player one we talked first"
-  		out dx , al
-                ;mov gameLeader, 69h
-                skipT:
-
-;Check that Data to input is Ready
-		mov dx , 3FDH		; Line Status Register
-	CHK:	in al , dx 
-  		AND al , 1
-  		JZ CHK
-
- ;If Ready read the VALUE in Receive data register
-  		mov dx , 03F8H
-  		in al , dx 
-
-cmp al,69h
-jne isLeader
-mov gameLeader,0h
-jmp hopAline
-isLeader: mov gameLeader,69h
-hopAline:
-
-
-
-  		
-cmp gameLeader,69h
-je first
-;; now recieve you were last
-
-mov cx,p2NameLen
+mov ax,0
+mov cx,15
 mov si,2
+sendName:
+		mov dx , 3FDH		; Line Status Register
+AGAINyx:  	In al , dx 		;Read Line Status
+  		AND al , 00100000b
+  		JZ AGAINyx                ; we exit this loop lw ynf3 nb3t data
+
+
+
+                mov dx , 3F8H		; we send our name  to the 2nd terminal
+  		mov  al,Pname1 + si
+  		out dx , ax 
+inc si
+loop sendName
+
+
+
+
+mov cx,15
+mov si,2
+
+
+mov dx , 3FDH ; Line Status Register
+
+CHKyx: in al , dx
+test al , 1
+JZ CHKyx ;Not Ready
+
 recName:
 
 
-	        mov dx , 3FDH		; Line Status Register
-	CHKx:	in al , dx 
+	        mov dx , 3FdH		; Line Status Register
+	CHKxx:	in al , dx 
   		AND al , 1
-  		JZ CHKx
+  		JZ CHKxx
 
                 mov dx , 03F8H
   		in al , dx 
@@ -1700,65 +1706,42 @@ recName:
 inc si
 loop recName
 
-cmp gameLeader,0
-jne skipPLS
-je sendName
-first:
- ;; send now
+;mov takingNamesDone,1
+
+
+;mov dx , 3FDH ; Line Status Register
+
+;CHKyxx: in al , dx
+;test al , 1
+;JZ CHKyxx ;Not Ready
 
 
 ;---------- we now send the names ostor ya rab ------------------------
 
-mov ax,0
-mov cx,p1NameLen
-mov si,2
-sendName:
-		mov dx , 3FDH		; Line Status Register
-AGAINx:  	In al , dx 		;Read Line Status
-  		AND al , 00100000b
-  		JZ AGAINx                ; we exit this loop lw ynf3 nb3t data
 
 
 
-                mov dx , 3F8H		; we send our name  to the 2nd terminal
-  		mov  al,Pname1 + si
-  		out dx , ax 
-inc si
-loop sendName
-
-cmp gameLeader,69h
-jne skip_
-
-mov cx,p2NameLen
-mov si,2
-recNameX:
-
-	        mov dx , 3FDH		; Line Status Register
-	CHKxX:	in al , dx 
-  		AND al , 1
-  		JZ CHKxX
-
-                mov dx , 03F8H
-  		in al , dx 
-  		mov Pname2 + si , al
 
 
 
-inc si
-loop recNameX
-
-
-skip_:
-skipPLS:
 
 ;---------- we now recieve the names ostor ya rab ------------------------
 
    
 
 
+lea dx, newLine
+mov ah,9
+int 21h
+
 lea dx, Pname2
 mov ah,9
 int 21h
+
+lea dx, newLine
+mov ah,9
+int 21h
+
 
 mov ah,4ch
 int 21h
