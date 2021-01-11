@@ -1767,9 +1767,9 @@ int 16h
 
 jz inviteChecker
 
-cmp al,3bh
+cmp ah,3bh
 je goChat
-cmp al,3ch
+cmp ah,3ch
 je goPlay
 jne sendPrompt
 	
@@ -1787,6 +1787,10 @@ AGAINaaa:  	In al , dx 			;Read Line Status
   		mov dx , 3F8H		; Transmit data register
   		mov  al,3ch
   		out dx , al 
+
+		
+
+
 
 goChat:
 mov ah,2
