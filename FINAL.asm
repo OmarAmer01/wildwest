@@ -19,6 +19,13 @@ p2NameLen db 0,'$'
 Pscore1 db 'Score:','$'
 Pscore2 db 'Score:','$'
 
+NAME1				DB		'You:$'
+NAME2				DB		'Another player:$'
+ToExit              DB      'Press Esc To Exit$'
+Cursorme            Dw           ?
+Cursorofother       Dw           ?
+sendingbyte         db           ?
+
 Pscorenum1 db 47,'$'
 Pscorenum2 db 47,'$'
 
@@ -1659,10 +1666,10 @@ CHK:	mov dx , 3FDH		; Line Status Register
 mov si,2
 ExchangeNames: ;---------- el ta3arof y3ny hahahahahah
 	mov cx,15	
-AGAIN2:          mov dx , 3FDH		; Line Status Register
-        	In al , dx 			;Read Line Status
-  		AND al , 00100000b
-  		JZ AGAIN2
+AGAIN2:        call waitUntillCTS ;  mov dx , 3FDH		; Line Status Register
+        	;In al , dx 			;Read Line Status
+  		;;AND al , 00100000b
+  		;JZ AGAIN2
 
 
                 mov dx , 3F8H		; Transmit data register
@@ -1670,10 +1677,10 @@ AGAIN2:          mov dx , 3FDH		; Line Status Register
   		out dx , al 
                 
 
-            rdy:    mov dx,3fdh
-                in al,dx
-                and al,1
-                jz rdy
+            rdy:  call waitUntillCTR ;  mov dx,3fdh
+              ;  in al,dx
+              ;  and al,1
+                ;jz rdy
 
                 mov dx,03f8h
                 in al , dx 
@@ -1734,6 +1741,9 @@ inviteChecker:
                 jne checkKeyBoard
 
 haveINV:
+mov ah,9
+lea dx,InviteREC
+int 21h
 mov dx , 03F8H
 in al , dx 
 cmp al,3ch
@@ -1764,7 +1774,7 @@ jmp inviteChecker
 
 checkKeyBoard:
 
-mov ah,1
+mov ah,0
 int 16h         
 
 jz inviteChecker
@@ -2013,6 +2023,8 @@ mov shieldDone,0
 mov knifePromptDone,0
 
 
+
+
 pusha
 
 readyCheck:         ; loop to make sure players have their guns
@@ -2021,9 +2033,19 @@ readyCheck:         ; loop to make sure players have their guns
 
 call drawP1Raised
 call drawP2Raised     
+;------------------------ l7ad hena el game mashya tamam
 
 mov ax,3
 int 33h             ; Get Mouse Status -> Gets put in BX
+
+xchg ax,bx
+;------ we now get to know the btn status of the other player
+	mov dx , 3FDH		; Line Status Register
+	CHKas:	in al , dx 
+  		AND al , 1
+  		JZ CHKas
+
+
 
 cmp bx,1            ; if LMB Pressed, then p1 is ready but p2 isnt
 je oneReady
