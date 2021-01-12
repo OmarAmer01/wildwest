@@ -137,11 +137,14 @@ knifeimgH equ 12
 Xposition DW 30  ;Player One X_Position
 Yposition DW 285 ;Player One Y_Position
 
+tempYposition DW 285
+chatYposition DW 150
+
 XptwoPosition DW 500 ;Player Two X_Position
 YptwoPosition DW 285 ;Player Two Y_Position
 
 bulletOneXPosition DW 145  ;Bullet One X_Position
-bulletOneYPosition equ 316 ;Bullet One Y_Position
+bulletYPosition equ 316 ;Bullet One Y_Position
 
 bulletTwoXPosition DW 470
 ;-------- Shield Date------------
@@ -158,9 +161,10 @@ shieldP2Hieght DW 400
 reset DW ?  
 
 bgrndcolor db 0           ;Set background color for images  
-clrColor db 0; el loon ele nrsm beh el kalam ama nkoon 3yzeen nms7
+                        ; el loon ele nrsm beh el kalam ama nkoon 3yzeen nms7
 
-clearbulletone DB 0   
+clearimage DB 0   
+chattitlemes DB ' Chatting ','$'
 
 ;--------------------------------- Player One --------------------------------------------
 p1Raised DB 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 
@@ -1909,7 +1913,7 @@ mov Bh,00
 mov AH,0cH						;condition of draw pixel
 mov al,05h          			;set the purple colour
 mov dx,185                      ;Y axis start from pixel 86 and take it as bold from Y:86 to Y:87		
-Barrier_between_Second_skip_chat:
+Barrier_between_Second_skipchat_chat:
 mov cx,00                       ;x axis starts from (0,185) to (320,186)
 drawing_horizont_line:
 int 10h
@@ -1918,19 +1922,19 @@ cmp cx,320
 jne drawing_horizont_line
 inc dx
 cmp dx,186
-jne Barrier_between_Second_skip_chat
+jne Barrier_between_Second_skipchat_chat
 ;---------------------------------------------------------------------------
 Mov Cursorme,0100h   ;begining of player 1 curser
 Mov Cursorofother,0C00h   ;begining of player 2 curser
 ;-----------------------sending-------------------------------------
 Back:mov ah,1						;get key pressed without waiting and it's loop until user press escape
 int 16h	
-jz hup;if no key pressed jump to hup without waiting input else go to next line
+jz hupchat;if no key pressed jump to hupchat without waiting input else go to next line
 cmp al,27  ;check if the key pressed is enter
-jz escapenow  ;if key was esc then get out of chat mode
+jz escapenowchat  ;if key was esc then get out of chat mode
 ;--------check for pressing enter--------------------
 cmp al,0dh
-jne skip888
+jne skipchat888
 mov ah,2                 
 mov bh,0
 mov dx,Cursorme             
@@ -1938,7 +1942,7 @@ inc dh
 mov dl,0h
 mov Cursorme,dx
 int 10h
-skip888:
+skipchat888:
 ;----------------------------------------------------------------------------
 mov sendingbyte,al  ;send entered character to var sendingbyte
 ;-----
@@ -1982,12 +1986,12 @@ mov dx,Cursorme
 mov dh,8
 mov Cursorme,dx
 DonotMakeanyscroll:
-hup:
+hupchat:
 ;----------recieve a char----------------------------------------------------------------
 mov dx , 3FDH		; Line Status Register
 in al , dx 
 AND al , 1
-jz skipchatting		
+jz skipchatchatting		
 mov dx , 03F8H
 in al , dx 
 mov sendingbyte , al		
@@ -1996,10 +2000,10 @@ mov bh,0
 mov dx,Cursorofother             
 int 10h
 cmp sendingbyte,27 ; if esc key was pressed
-jz escapenow
+jz escapenowchat
 ;--------check for pressing enter--------------------
 cmp al,0dh
-jne skip889
+jne skipchat22
 mov ah,2                 
 mov bh,0
 mov dx,Cursorofother             
@@ -2007,7 +2011,7 @@ inc dh
 mov dl,0h
 mov Cursorofother,dx
 int 10h
-skip889:
+skipchat22:
 ;-----------------------------------------------------------------------------
 mov ah,2
 mov dl,sendingbyte
@@ -2018,7 +2022,7 @@ int 10h
 mov Cursorofother,dx
 mov dx,Cursorofother
 cmp dh,22
-jne Donotshiftmore		
+jne Donotshiftmore11		
 mov ah,6       
 mov al,1        ; scroll by 1 line    
 mov bh,0       ; normal video attribute         
@@ -2030,10 +2034,10 @@ int 10h
 mov dx,Cursorofother
 mov dh,21
 mov Cursorofother,dx
-Donotshiftmore:
-skipchatting:
+Donotshiftmore11:
+skipchatchatting:
 jmp BACK
-escapenow:
+escapenowchat:
 jmp BACKTOMENU
 
 
@@ -2079,7 +2083,7 @@ AGAINasy:  	In al , dx 			;Read Line Status
   		
 
 cmp al,97 ; If Letter "a" was pressed then it will make clear screen then go to Game Mode
-jnz skip
+jnz skipchat
 
 ;-----------clearscreen------------------------- 
 MOV AX,0600H    ;06 TO SCROLL & 00 FOR FULL SCREEN
@@ -2111,7 +2115,7 @@ int 16h
 cmp al,97 ; check for enter letter of a to choose level 1
 
 
-jnz skip_3  
+jnz skipchat_3  
 ;-----------clearscreen------------------------- 
 MOV AX,0600H    ;06 TO SCROLL & 00 FOR FULL SCREEN
 MOV BH,71H    ;ATTRIBUTE 7 FOR BACKGROUND AND 1 FOR FOREGROUND
@@ -2126,12 +2130,12 @@ jmp startTheGame
 mov ah,9 ;printing string "level 1 is on" massage
 mov dx,offset Level_2
 int 21h    
-skip_3:
+skipchat_3:
 ;---------------------------------------------
 
     
 cmp al,98 ; check for enter letter of b to go to level 2 of game mode
-jnz skip_4  
+jnz skipchat_4  
 ;-----------clearscreen------------------------- 
 MOV AX,0600H    ;06 TO SCROLL & 00 FOR FULLJ SCREEN
 MOV BH,71H    ;ATTRIBUTE 7 FOR BACKGROUND AND 1 FOR FOREGROUND
@@ -2143,11 +2147,11 @@ INT 10H        ;FOR VIDEO DISPLAY
 mov ah,9  ;Printing "Level 2 is on " massage
 mov dx,offset Level_3
 int 21h    
-skip_4:
-skip:
+skipchat_4:
+skipchat:
 ;---------------------------------------------------  
 cmp al,98   ;check for enter letter b to go to chat mode
-jnz skip_2       
+jnz skipchat_2       
 ;-----------clearscreen------------------------- 
 MOV AX,0600H    ;06 TO SCROLL & 00 FOR FULL SCREEN
 MOV BH,71H    ;ATTRIBUTE 7 FOR BACKGROUND AND 1 FOR FOREGROUND
@@ -2159,7 +2163,7 @@ mov ah,9 ;printing chat mode is on phase 3
 mov dx,offset chat
 int 21h
    
-skip_2:
+skipchat_2:
 push ax
 push dx
 mov ah,6
@@ -2209,15 +2213,15 @@ call p1Knivescount
 call p2Knivescount
 
 cmp Pscorenum1,47
-jne skipthis
+jne skipchatthis
 call PlayerOneIncrementScore
-skipthis:
+skipchatthis:
                                         ; A Work arround el issua bta3et el score
                                         ; real friends know whats up
 cmp Pscorenum2,47
-jne skipthisToo
+jne skipchatthisToo
 call PlayerTwoIncrementScore
-skipthisToo:
+skipchatthisToo:
 
 ;------------------------------------Start Ready Check--------------------------------
 
@@ -2239,6 +2243,15 @@ mov hisMouse,0
 call drawP1Raised
 call drawP2Raised     
 ;------------------------ l7ad hena el game mashya tamam
+
+;------- Internal Chat
+;--------------------Get Chat Mode by pressing on (b)------------------------------------------------------------------------
+mov ah,0  ;get key pressed from user
+int 16h
+cmp AL,98
+jne skipchatchat
+Call ChatStart
+skipchatchat:
 
 mov ax,3
 int 33h             ; Get Mouse Status -> Gets put in BX
@@ -2307,12 +2320,12 @@ mov myMouse,bl
 
 cmp hisMouse,1                ;IF PLAYER 2 READY BUT 1 NOT READY
 ;je twoReady
-jne skipcmp
+jne skipchatcmp
 jne twoReady
 cmp myMouse,0
 je twoReady
 
-skipcmp:
+skipchatcmp:
 
 cmp myMouse,0
 jne plsSkp
@@ -2458,7 +2471,7 @@ div bl
 mov knifePerc,ah ;50% chance for knife to happen each round
 
 cmp isSlave,1
-jne skipSending
+jne skipchatSending
 call waitUntillCTS
 mov dx , 3F8H		; Transmit data register
   		mov  al,waitTime
@@ -2490,7 +2503,7 @@ mov  al,ShieldWaitTimeInFunc
 mov  al,currSysTime
   		        out dx , al 
 
-skipSending:
+skipchatSending:
 cmp isSlave,1
 jne foulCheck
 call waitUntillCTR
@@ -2521,7 +2534,7 @@ mov dx , 03F8H
                  call waitUntillCTR
                   mov dx , 03F8H
   		in al , dx 
-  		mov knifePerc , al
+  		mov currSysTime , al
 
 
 
@@ -2557,7 +2570,7 @@ cmp myMouse,1
 jne stopthis2
 cmp hisMouse,1
 jne nextCompare
-je skipAllFouls
+je skipchatAllFouls
 stopthis2:
 
 
@@ -2570,19 +2583,19 @@ nextCompare:
  jmp startRound
 ;cmp bx,2
 
-jne skipComp
+jne skipchatComp
 
 call foulP1		;lw 7d 3amal foul n2ool
 jmp startRound ;restart the game
 
-skipComp:
+skipchatComp:
 cmp bx,0
-jne skipthisPlease
+jne skipchatthisPlease
 jmp startRound
 
-skipthisPlease:
+skipchatthisPlease:
 
-skipAllFouls:
+skipchatAllFouls:
 
 mov ah,2ch
 int 21h    	; nbos 3la el sa3a
@@ -2596,21 +2609,21 @@ ignore3:
 
 SUB dh,currSysTime		
 cmp shieldDone,1
-jz skipShield
+jz skipchatShield
 cmp dh,ShieldWaitTime ;check if its time to call shield
-jne skipShield
+jne skipchatShield
 call clearkeyboardbuffer
 call ShieldPrompt
 mov shieldDone,1
 cmp P1HasSheild,0 ;check if p1 won shield
-jz skipShield1
+jz skipchatShield1
 Call PlayerOneStatusBarSheild
-jmp skipShield
-skipShield1:
+jmp skipchatShield
+skipchatShield1:
 cmp P2HasSheild,0 ;check if p2 won shield
-jz skipShield
+jz skipchatShield
 Call PlayerTwoStatusBarSheild
-skipShield:
+skipchatShield:
 call clrp1shieldprompt
 call clrp2shieldprompt
 
@@ -2618,11 +2631,11 @@ mov ah,2ch
 int 21h
 sub dh,currSysTime
 cmp dh,knifeWaitTime
-jnz skipKnife
+jnz skipchatKnife
 cmp knifePerc,0
-jz skipKnife
+jz skipchatKnife
 cmp knifePromptDone,1
-jz skipKnife
+jz skipchatKnife
 call knifePrompt
 call clrp1shieldprompt
 call clrp2shieldprompt
@@ -2630,7 +2643,7 @@ call p1Knivescount
 call p2Knivescount
 mov knifePromptDone,1
 add waitTime,4
-skipKnife:
+skipchatKnife:
 
 mov ah,2ch ;dh will shange in shield prompt func so redoing time get here
 int 21h
@@ -2676,9 +2689,9 @@ mov ah,1
 int 16h
 
 cmp ah,39h
-jne skipp2knife1
+jne skipchatp2knife1
 cmp byte ptr p2KnifeCount,48
-je skipp2knife1
+je skipchatp2knife1
 call ShootPlayerOneKnife
 call PlayerTwoIncrementScore
 dec p2KnifeCount
@@ -2692,12 +2705,12 @@ pop DX
 pop ax
 
 jmp startRound
-skipp2knife1:
+skipchatp2knife1:
 
 cmp ah,2ch
-jne skipp1knife1
+jne skipchatp1knife1
 cmp p1KnifeCount,48
-je skipp1knife1
+je skipchatp1knife1
 call ShootPlayerTwoKnife
 call PlayerOneIncrementScore
 dec p1KnifeCount
@@ -2711,7 +2724,7 @@ pop DX
 pop ax
 
 jmp startRound
-skipp1knife1:
+skipchatp1knife1:
 
 cmp ah,1eh              ; if letter 'a' not pressed
 jne nextComp            ; next comparison
@@ -2746,7 +2759,7 @@ pop DX
 pop ax
 
 cmp ah,1ch               ; if enter key pressed
-jne skipShooting
+jne skipchatShooting
 call ShootPlayerOne
 jmp startRound
 push ax
@@ -2757,7 +2770,7 @@ int 21h
 pop DX
 pop ax
 
-skipShooting:
+skipchatShooting:
 
 push ax
 push dx
@@ -2802,17 +2815,17 @@ mov ah,1
 int 16h
 
 cmp ah,39h
-jne skipp2knife
+jne skipchatp2knife
 cmp byte ptr p2KnifeCount,48
-je skipp2knife
+je skipchatp2knife
 call ShootPlayerOneKnife
 call PlayerTwoIncrementScore
 dec p2KnifeCount
 jmp startRound
-skipp2knife:
+skipchatp2knife:
 
 cmp ah,1ch
-jne skipShooting2
+jne skipchatShooting2
 call ShootPlayerOne
 jmp startRound
 
@@ -2824,7 +2837,7 @@ int 21h
 pop DX
 pop ax
 
-skipShooting2:
+skipchatShooting2:
 mov ax,3
 int 33h			; Put mouse status in BX
 
@@ -2856,17 +2869,17 @@ mov ah,1
 int 16h
 
 cmp ah,2ch
-jne skipp1knife
+jne skipchatp1knife
 cmp p1KnifeCount,48
-je skipp1knife
+je skipchatp1knife
 call ShootPlayerTwoKnife
 call PlayerOneIncrementScore
 dec p1KnifeCount
 jmp startRound
-skipp1knife:
+skipchatp1knife:
 
 cmp ah,1eh
-jne skipShooting3
+jne skipchatShooting3
 call ShootPlayerTwo
 jmp startRound
 
@@ -2878,7 +2891,7 @@ int 21h
 pop DX
 pop ax
 
-skipShooting3:
+skipchatShooting3:
 
 mov ax,3
 int 33h
@@ -2995,8 +3008,10 @@ drawP1Raised PROC
 	       jmp Start    	;Avoid drawing before the calculations
 	Drawit:
 	       MOV AH,0Ch   	;set the configuration to writing a pixel
-           cmp byte ptr [DI],0
+           cmp [DI],0
 		   JZ setbgrndcolor
+                   cmp clearimage,1
+                   JZ setbgrndcolor 
 		   mov al, [DI]     ; color of the current coordinates
 	       MOV BH,00h   	;set the page number
 	       INT 10h      	;execute the configuration
@@ -3027,16 +3042,18 @@ drawP2Raised PROC
 	       MOV AH,0Bh   	;set the configuration
 	       MOV CX, XptwoPosition  	;set the start drawing point 
 	       ADD CX, imgW2  	;set the width (X) up to 64 (based on image resolution)
-	       MOV DX, YptwoPosition 	;set the hieght (Y) up to 64 (based on image resolution)
+	       MOV DX, Yposition 	;set the hieght (Y) up to 64 (based on image resolution)
 	       ADD DX, imgH 	;set the hieght (Y) up to 64 (based on image resolution)
 		   mov DI, offset p2Raised  ; to iterate over the pixels
 	       jmp StartTwo    	;Avoid drawing before the calculations
 	DrawitTwo:
 	       MOV AH,0Ch   	;set the configuration to writing a pixel
-           cmp byte ptr [DI],0
+           cmp [DI],0
 		   JZ setbgrndcolor2
 		   mov al, [DI]     ; color of the current coordinates
-	       MOV BH,00h   	;set the page number
+                   cmp clearimage,1
+                   JZ setbgrndcolor2
+               MOV BH,00h   	;set the page number
 	       INT 10h      	;execute the configuration
 		   jmp StartTwo
 	setbgrndcolor2:
@@ -3050,7 +3067,7 @@ drawP2Raised PROC
 	       JNZ DrawitTwo
            ADD Cx, imgW2 	;  if loop iteration in y direction, then x should start over so that we sweep the grid
 	       DEC DX       	;  loop iteration in y direction
-	       cmp DX,YptwoPosition
+	       cmp DX,Yposition
 	       JZ  ENDINGTwo   	;  both x and y reached 00 so end program
 		   Jmp DrawitTwo
 
@@ -3071,10 +3088,12 @@ drawP1Holstered PROC
 	       jmp Start2    	;Avoid drawing before the calculations
 	Drawit2:
 	       MOV AH,0Ch   	;set the configuration to writing a pixel
-           cmp byte ptr [DI],0
+           cmp [DI],0
 		   JZ setbgrndcolorh
 		   mov al, [DI]     ; color of the current coordinates
-	       MOV BH,00h   	;set the page number
+                   cmp clearimage,1
+                   JZ setbgrndcolorh
+               MOV BH,00h   	;set the page number
 	       INT 10h      	;execute the configuration
 		   jmp Start2
 	setbgrndcolorh:
@@ -3103,16 +3122,18 @@ drawP2Holstered PROC
 	       MOV AH,0Bh   	;set the configuration
 	       MOV CX, XptwoPosition  	;set the start drawing point 
 	       ADD CX, imgWholster2  	;set the width (X) up to 64 (based on image resolution)
-	       MOV DX, YptwoPosition 	;set the hieght (Y) up to 64 (based on image resolution)
+	       MOV DX, Yposition 	;set the hieght (Y) up to 64 (based on image resolution)
 	       ADD DX, imgH 	;set the hieght (Y) up to 64 (based on image resolution)
 		   mov DI, offset p2Holstered  ; to iterate over the pixels
 	       jmp StartTwoH    	;Avoid drawing before the calculations
 	DrawitTwoH:
 	       MOV AH,0Ch   	;set the configuration to writing a pixel
-           cmp byte ptr [DI],0
+           cmp [DI],0
 		   JZ setbgrndcolorTwoH
 		   mov al, [DI]     ; color of the current coordinates
-	       MOV BH,00h   	;set the page number
+                cmp clearimage,1        ; To clear the image
+                   JZ setbgrndcolorTwoH 
+               MOV BH,00h   	;set the page number
 	       INT 10h      	;execute the configuration
 		   jmp StartTwoH
 	setbgrndcolorTwoH:
@@ -3126,7 +3147,7 @@ drawP2Holstered PROC
 	       JNZ DrawitTwoH
            ADD Cx, imgWholster2 	;  if loop iteration in y direction, then x should start over so that we sweep the grid
 	       DEC DX       	;  loop iteration in y direction
-	       cmp DX,YptwoPosition
+	       cmp DX,Yposition
            JZ  ENDINGTwoH   	;  both x and y reached 00 so end program
 		   Jmp DrawitTwoH
 
@@ -3502,54 +3523,31 @@ mov ah,2ch
 int 21h
 SUB dh,currSysTime
 cmp dh,ShieldWaitTimeInFunc
-jne skipsp1
+jne skipchatsp1
 ret
-skipsp1:
+skipchatsp1:
 
 call drawP1Holstered
 call drawP2Holstered
 
-
 mov ax,3
-int 33h             ; Get Mouse Status -> Gets put in BX
+int 33h 		; get mouse button status
 
-xchg ax,bx
-push ax
-;------ we now get to know the btn status of the other player via serial yarbbb
-call waitUntillCTS
-                mov dx , 3F8H		; Transmit data register
-  		pop ax
-  		out dx , al 
-call waitUntillCTR
-                mov dx , 03F8H
-  		in al , dx 
-  		xchg ax,bx
-mov hisMouse,bl
-;------- we now store the mouse data of this player
-mov ax,3
-int 33h
-mov myMouse,bl		; get mouse button status		; get mouse button status
+cmp bx,1
+jne nextCompare1
+call foulP2		;lw 7d 3amal foul n2ool
+jmp startRound  ;restart the game
 
-cmp myMouse,1
-jne f1
-cmp hisMouse,1
-jne f2
-je SkipComp1
-		;lw 7d 3amal foul n2ool
-  
+nextCompare1:
 
-;nextCompare1:
+cmp bx,2
 
-;cmp bx,2
-cmp myMouse,0
-je f1
-cmp hisMouse,1
-jne foulOn2
+jne skipchatComp1
 
-;f1: call foulP1		;lw 7d 3amal foul n2ool
-;jmp startRound ;restart the game
+call foulP1		;lw 7d 3amal foul n2ool
+jmp startRound ;restart the game
 
-skipComp1:
+skipchatComp1:
 
 mov ax,0
 mov ah,1h
@@ -3559,13 +3557,13 @@ jz check1
 
 add di,0
 cmp ah, 48h
-jnz skip1
+jnz skipchat1
 mov P2HasSheild,1
 ; mov ah,9
 ; lea dx,P1HasSheildPrompt
 ; int 21h
 jmp l
-skip1:add si,0
+skipchat1:add si,0
 cmp al,77h
 jnz clr1
 mov P1HasSheild,1
@@ -3600,39 +3598,31 @@ mov ah,2ch
 int 21h
 SUB dh,currSysTime
 cmp dh,ShieldWaitTimeInFunc
-jne skipsp2
+jne skipchatsp2
 ret
-skipsp2:
+skipchatsp2:
 
 call drawP1Holstered
 call drawP2Holstered
 
 mov ax,3
-int 33h
-mov myMouse,bl		; get mouse button status		; get mouse button status
+int 33h 		; get mouse button status
 
-cmp myMouse,1
-jne f1
-cmp hisMouse,1
-jne f2
-je SkipComp2
-		;lw 7d 3amal foul n2ool
-  
+cmp bx,1
+jne nextCompare2
+call foulP2		;lw 7d 3amal foul n2ool
+jmp startRound  ;restart the game
 
-;nextCompare1:
+nextCompare2:
 
-;cmp bx,2
-cmp myMouse,0
-je f1
-cmp hisMouse,1
-jne foulOn2
+cmp bx,2
 
-f11: call foulP1		;lw 7d 3amal foul n2ool
+jne skipchatComp2
+
+call foulP1		;lw 7d 3amal foul n2ool
 jmp startRound ;restart the game
 
-
-
-skipComp2:
+skipchatComp2:
 
 mov ax,0
 mov ah,1h
@@ -3642,13 +3632,13 @@ jz check2
 
 add di,0
 cmp ah, 4Bh
-jnz skip2
+jnz skipchat2
 mov P2HasSheild,1
 ; mov ah,9
 ; lea dx,P1HasSheildPrompt
 ; int 21h
 jmp l
-skip2:;add si,1
+skipchat2:;add si,1
 cmp al,61h
 jnz clr2
 mov P1HasSheild,1
@@ -3687,39 +3677,31 @@ mov ah,2ch
 int 21h
 SUB dh,currSysTime
 cmp dh,ShieldWaitTimeInFunc
-jne skipsp3
+jne skipchatsp3
 ret
-skipsp3:
+skipchatsp3:
 
 call drawP1Holstered
 call drawP2Holstered
 
 mov ax,3
-int 33h
-mov myMouse,bl		; get mouse button status		; get mouse button status
+int 33h 		; get mouse button status
 
-cmp myMouse,1
-jne f1
-cmp hisMouse,1
-jne f2
-je SkipComp3
-		;lw 7d 3amal foul n2ool
-  
+cmp bx,1
+jne nextCompare3
+call foulP2		;lw 7d 3amal foul n2ool
+jmp startRound  ;restart the game
 
-;nextCompare1:
+nextCompare3:
 
-;cmp bx,2
-cmp myMouse,0
-je f21
-cmp hisMouse,1
-jne foulOn2
+cmp bx,2
 
-f21: call foulP1		;lw 7d 3amal foul n2ool
+jne skipchatComp3
+
+call foulP1		;lw 7d 3amal foul n2ool
 jmp startRound ;restart the game
 
-
-
-skipComp3:
+skipchatComp3:
 
 mov ax,0
 mov ah,1h
@@ -3729,13 +3711,13 @@ jz check3
 
 add di,0
 cmp ah, 50h
-jnz skip3
+jnz skipchat3
 mov P2HasSheild,1
 ; mov ah,9
 ; lea dx,P1HasSheildPrompt
 ; int 21h
 jmp l
-skip3:add si,2
+skipchat3:add si,2
 cmp al,73h
 jnz clr1
 mov P1HasSheild,1
@@ -3773,38 +3755,31 @@ mov ah,2ch
 int 21h
 SUB dh,currSysTime
 cmp dh,ShieldWaitTimeInFunc
-jne skipsp4
+jne skipchatsp4
 ret
-skipsp4:
+skipchatsp4:
 
 call drawP1Holstered
 call drawP2Holstered
 
 mov ax,3
-int 33h
-mov myMouse,bl		; get mouse button status		; get mouse button status
+int 33h 		; get mouse button status
 
-cmp myMouse,1
-jne f1
-cmp hisMouse,1
-jne f2
-je SkipComp4
-		;lw 7d 3amal foul n2ool
-  
+cmp bx,1
+jne nextCompare4
+call foulP2		;lw 7d 3amal foul n2ool
+jmp startRound  ;restart the game
 
-;nextCompare1:
+nextCompare4:
 
-;cmp bx,2
-cmp myMouse,0
-je f1
-cmp hisMouse,1
-jne foulOn2
+cmp bx,2
 
+jne skipchatComp4
 
+call foulP1		;lw 7d 3amal foul n2ool
+jmp startRound ;restart the game
 
-
-
-skipComp4:
+skipchatComp4:
 
 mov ax,0
 mov ah,1h
@@ -3814,13 +3789,13 @@ jz check4
 
 add di,0
 cmp ah, 4Dh
-jnz skip4
+jnz skipchat4
 mov P2HasSheild,1
 ; mov ah,9
 ; lea dx,P1HasSheildPrompt
 ; int 21h
 jmp l
-skip4:add si,3
+skipchat4:add si,3
 cmp al,64h
 jnz clr4
 mov P1HasSheild,1
@@ -3891,9 +3866,9 @@ mov ah,0
         mov dx,9999
         int 15h
         ;Clear Previous shot
-        mov clearbulletone,1
+        mov clearimage,1
         call DrawPlayerOneBullet
-        mov clearbulletone,0
+        mov clearimage,0
         ;---------------------
         ADD bulletOneXPosition,10        
         CMP bulletOneXPosition,455
@@ -3922,9 +3897,9 @@ ShootPlayerOne PROC
         mov dx,9999
         int 15h
         ;Clear Previous shot
-        mov clearbulletone,1
+        mov clearimage,1
         call DrawPlayerTwoBullet
-        mov clearbulletone,0
+        mov clearimage,0
         ;---------------------
         SUB bulletTwoXPosition,10        
         CMP bulletTwoXPosition,140
@@ -3954,9 +3929,9 @@ ShootPlayerTwoKnife PROC
         mov dx,9999
         int 15h
         ;Clear Previous shot
-        mov clearbulletone,1
+        mov clearimage,1
         call DrawPlayerOneknife
-        mov clearbulletone,0
+        mov clearimage,0
         ;---------------------
         ADD bulletOneXPosition,10        
         CMP bulletOneXPosition,555
@@ -3978,9 +3953,9 @@ ShootPlayerOneKnife PROC
         mov dx,9999
         int 15h
         ;Clear Previous shot
-        mov clearbulletone,1
+        mov clearimage,1
         call DrawPlayerTwoKnife
-        mov clearbulletone,0
+        mov clearimage,0
         ;---------------------
         SUB bulletTwoXPosition,10        
         CMP bulletTwoXPosition,10
@@ -3997,13 +3972,13 @@ DrawPlayerOneBullet PROC
 	       MOV AH,0Bh   	;set the configuration
 	       MOV CX, bulletOneXPosition  	;set the start drawing point 
 	       ADD CX, bulletimgW  	;set the width (X) up to 64 (based on image resolution)
-	       MOV DX, bulletOneYPosition 	;set the hieght (Y) up to 64 (based on image resolution)
+	       MOV DX, bulletYPosition 	;set the hieght (Y) up to 64 (based on image resolution)
 	       ADD DX, bulletimgH 	;set the hieght (Y) up to 64 (based on image resolution)
 		   mov DI, offset bulletimg  ; to iterate over the pixels
 	       jmp StartBullet    	;Avoid drawing before the calculations
 	DrawitBullet:
 	       MOV AH,0Ch   	;set the configuration to writing a pixel
-           cmp clearbulletone,1
+           cmp clearimage,1
            JNZ currentcolor 
            mov al, bgrndcolor        ; color of Background
            MOV BH,00h   	;set the page number
@@ -4019,7 +3994,7 @@ DrawPlayerOneBullet PROC
 	       JNZ DrawitBullet
            ADD Cx, bulletimgW 	;  if loop iteration in y direction, then x should start over so that we sweep the grid
 	       DEC DX       	;  loop iteration in y direction
-	       cmp DX,bulletOneYPosition
+	       cmp DX,bulletYPosition
            JZ  ENDINGBullet   	;  both x and y reached 00 so end program
 		   Jmp DrawitBullet
 
@@ -4035,13 +4010,13 @@ DrawPlayerTwoBullet PROC
 	       MOV AH,0Bh   	;set the configuration
 	       MOV CX, bulletTwoXPosition  	;set the start drawing point 
 	       ADD CX, bulletimgW  	;set the width (X) up to 64 (based on image resolution)
-	       MOV DX, bulletOneYPosition 	;set the hieght (Y) up to 64 (based on image resolution)
+	       MOV DX, bulletYPosition 	;set the hieght (Y) up to 64 (based on image resolution)
 	       ADD DX, bulletimgH 	;set the hieght (Y) up to 64 (based on image resolution)
 		   mov DI, offset bulletimg2  ; to iterate over the pixels
 	       jmp StartBullet2    	;Avoid drawing before the calculations
 	DrawitBullet2:
 	       MOV AH,0Ch   	;set the configuration to writing a pixel
-           cmp clearbulletone,1
+           cmp clearimage,1
            JNZ currentcolor2 
            mov al, bgrndcolor        ; color of Background
            MOV BH,00h   	;set the page number
@@ -4057,7 +4032,7 @@ DrawPlayerTwoBullet PROC
 	       JNZ DrawitBullet2
            ADD Cx, bulletimgW 	;  if loop iteration in y direction, then x should start over so that we sweep the grid
 	       DEC DX       	;  loop iteration in y direction
-	       cmp DX,bulletOneYPosition
+	       cmp DX,bulletYPosition
            JZ  ENDINGBullet2   	;  both x and y reached 00 so end program
 		   Jmp DrawitBullet2
 
@@ -4071,13 +4046,13 @@ DrawPlayerOneknife PROC
 	       MOV AH,0Bh   	;set the configuration
 	       MOV CX, bulletOneXPosition  	;set the start drawing point 
 	       ADD CX, knifeimgW  	;set the width (X) up to 64 (based on image resolution)
-	       MOV DX, bulletOneYPosition 	;set the hieght (Y) up to 64 (based on image resolution)
+	       MOV DX, bulletYPosition 	;set the hieght (Y) up to 64 (based on image resolution)
 	       ADD DX, knifeimgH 	;set the hieght (Y) up to 64 (based on image resolution)
 		   mov DI, offset knifeimg1  ; to iterate over the pixels
 	       jmp Startknife   	;Avoid drawing before the calculations
 	Drawitknife:
 	       MOV AH,0Ch   	;set the configuration to writing a pixel
-           cmp clearbulletone,1
+           cmp clearimage,1
            JNZ currentcolorknife 
            mov al, bgrndcolor        ; color of Background
            MOV BH,00h   	;set the page number
@@ -4093,7 +4068,7 @@ DrawPlayerOneknife PROC
 	       JNZ Drawitknife
            ADD Cx, knifeimgW 	;  if loop iteration in y direction, then x should start over so that we sweep the grid
 	       DEC DX       	;  loop iteration in y direction
-	       cmp DX,bulletOneYPosition
+	       cmp DX,bulletYPosition
            JZ  ENDINGknife   	;  both x and y reached 00 so end program
 		   Jmp Drawitknife
 
@@ -4108,13 +4083,13 @@ DrawPlayerTwoKnife PROC
 	       MOV AH,0Bh   	;set the configuration
 	       MOV CX, bulletTwoXPosition  	;set the start drawing point 
 	       ADD CX, knifeimgW  	;set the width (X) up to 64 (based on image resolution)
-	       MOV DX, bulletOneYPosition 	;set the hieght (Y) up to 64 (based on image resolution)
+	       MOV DX, bulletYPosition 	;set the hieght (Y) up to 64 (based on image resolution)
 	       ADD DX, knifeimgH 	;set the hieght (Y) up to 64 (based on image resolution)
 		   mov DI, offset knifeimg2  ; to iterate over the pixels
 	       jmp Startknife2    	;Avoid drawing before the calculations
 	Drawitknife2:
 	       MOV AH,0Ch   	;set the configuration to writing a pixel
-           cmp clearbulletone,1
+           cmp clearimage,1
            JNZ currentcolorknife2 
            mov al, bgrndcolor        ; color of Background
            MOV BH,00h   	;set the page number
@@ -4130,7 +4105,7 @@ DrawPlayerTwoKnife PROC
 	       JNZ Drawitknife2
            ADD Cx, knifeimgW 	;  if loop iteration in y direction, then x should start over so that we sweep the grid
 	       DEC DX       	;  loop iteration in y direction
-	       cmp DX,bulletOneYPosition
+	       cmp DX,bulletYPosition
            JZ  ENDINGknife2   	;  both x and y reached 00 so end program
 		   Jmp Drawitknife2
 
@@ -4168,7 +4143,7 @@ GameTitle    PROC
 GameTitle endp
 
 CLRGameTitle    PROC
-        mov bl,clrColor;(foreground and background)
+        mov bl,bgrndcolor;(foreground and background)
         ;     0000             1111
         ;|_ Background _| |_ Foreground _|
         mov cx,31;length of string
@@ -4312,7 +4287,7 @@ clrPlayerOneStatusBarSheild    PROC
         mov es,si;moves to es the location in memory of the data segment
         mov ah,13h;service to print string in graphic mode
         mov al,0;sub-service 0 all the characters will be in the same color(bl)
-        mov bl,clrColor;color of the text (white foreground and black background)
+        mov bl,bgrndcolor;color of the text (white foreground and black background)
         ;     0000             1111
         ;|_ Background _| |_ Foreground _|
 
@@ -4330,7 +4305,7 @@ clrPlayerTwoStatusBarSheild    PROC
         mov es,si;moves to es the location in memory of the data segment
         mov ah,13h;service to print string in graphic mode
         mov al,0;sub-service 0 all the characters will be in the same color(bl)
-        mov bl,clrColor;color of the text (white foreground and black background)
+        mov bl,bgrndcolor;color of the text (white foreground and black background)
         ;     0000             1111
         ;|_ Background _| |_ Foreground _|
 
@@ -4358,7 +4333,7 @@ GameReadyStatement endp
 
 
 ClearGameReadyStatement    PROC
-        mov bl,clrColor;(foreground and background)
+        mov bl,bgrndcolor;(foreground and background)
         ;     0000             1111
         ;|_ Background _| |_ Foreground _|
         mov cx,33;length of string
@@ -4395,7 +4370,7 @@ MissedShotMessage2 endp
 
 
 CLRMissedShotMessage1    PROC      ; shows foul
-        mov bl,clrColor;(foreground and background)
+        mov bl,bgrndcolor;(foreground and background)
         ;     0000             1111
         ;|_ Background _| |_ Foreground _|
         mov cx,5;length of string
@@ -4407,7 +4382,7 @@ CLRMissedShotMessage1    PROC      ; shows foul
 CLRMissedShotMessage1 endp
 ;-----------Display Missed Shot message for Player Two  -----
 CLRMissedShotMessage2    PROC                              ; shows foul
-        mov bl,clrColor;(foreground and background)
+        mov bl,bgrndcolor;(foreground and background)
         ;     0000             1111
         ;|_ Background _| |_ Foreground _|
         mov cx,5;length of string
@@ -4425,7 +4400,7 @@ clrp1shieldprompt proc
         mov es,si;moves to es the location in memory of the data segment
         mov ah,13h;service to print string in graphic mode
         mov al,0;sub-service 0 all the characters will be in the same color(bl)
-        mov bl,clrColor;color of the text (white foreground and black background)
+        mov bl,bgrndcolor;color of the text (white foreground and black background)
         ;     0000             1111
         ;|_ Background _| |_ Foreground _|
 
@@ -4444,7 +4419,7 @@ clrp2shieldprompt proc
         mov es,si;moves to es the location in memory of the data segment
         mov ah,13h;service to print string in graphic mode
         mov al,0;sub-service 0 all the characters will be in the same color(bl)
-        mov bl,clrColor;color of the text (white foreground and black background)
+        mov bl,bgrndcolor;color of the text (white foreground and black background)
         ;     0000             1111
         ;|_ Background _| |_ Foreground _|
 
@@ -4463,7 +4438,7 @@ clrp1shield proc
         mov es,si;moves to es the location in memory of the data segment
         mov ah,13h;service to print string in graphic mode
         mov al,0;sub-service 0 all the characters will be in the same color(bl)
-        mov bl,clrColor;color of the text (white foreground and black background)
+        mov bl,bgrndcolor;color of the text (white foreground and black background)
         ;     0000             1111
         ;|_ Background _| |_ Foreground _|
 
@@ -4482,7 +4457,7 @@ clrp2shield proc
         mov es,si;moves to es the location in memory of the data segment
         mov ah,13h;service to print string in graphic mode
         mov al,0;sub-service 0 all the characters will be in the same color(bl)
-        mov bl,clrColor;color of the text (white foreground and black background)
+        mov bl,bgrndcolor;color of the text (white foreground and black background)
         ;     0000             1111
         ;|_ Background _| |_ Foreground _|
 
@@ -4603,9 +4578,9 @@ mov ah,2ch
 int 21h
 SUB dh,currSysTime
 cmp dh,KnifeWaitTimeInFunc
-jne kskipsp1
+jne kskipchatsp1
 ret
-kskipsp1:
+kskipchatsp1:
 
 call drawP1Holstered
 call drawP2Holstered
@@ -4622,12 +4597,12 @@ knextCompare1:
 
 cmp bx,2
 
-jne kskipComp1
+jne kskipchatComp1
 
 call foulP1		;lw 7d 3amal foul n2ool
 jmp startRound ;restart the game
 
-kskipComp1:
+kskipchatComp1:
 
 mov ax,0
 mov ah,1h
@@ -4637,13 +4612,13 @@ jz kcheck1
 
 add di,0
 cmp ah, 48h
-jnz kskip1
+jnz kskipchat1
 inc p2KnifeCount
 ; mov ah,9
 ; lea dx,P1HasSheildPrompt
 ; int 21h
 jmp kl
-kskip1:add si,0
+kskipchat1:add si,0
 cmp al,77h
 jnz kclr1
 inc p1KnifeCount
@@ -4678,9 +4653,9 @@ mov ah,2ch
 int 21h
 SUB dh,currSysTime
 cmp dh,KnifeWaitTimeInFunc
-jne kskipsp2
+jne kskipchatsp2
 ret
-kskipsp2:
+kskipchatsp2:
 
 call drawP1Holstered
 call drawP2Holstered
@@ -4697,12 +4672,12 @@ knextCompare2:
 
 cmp bx,2
 
-jne kskipComp2
+jne kskipchatComp2
 
 call foulP1		;lw 7d 3amal foul n2ool
 jmp startRound ;restart the game
 
-kskipComp2:
+kskipchatComp2:
 
 mov ax,0
 mov ah,1h
@@ -4712,13 +4687,13 @@ jz kcheck2
 
 add di,0
 cmp ah, 4Bh
-jnz kskip2
+jnz kskipchat2
 inc p2KnifeCount
 ; mov ah,9
 ; lea dx,P1HasSheildPrompt
 ; int 21h
 jmp kl
-kskip2:;add si,1
+kskipchat2:;add si,1
 cmp al,61h
 jnz kclr2
 inc p1KnifeCount
@@ -4757,9 +4732,9 @@ mov ah,2ch
 int 21h
 SUB dh,currSysTime
 cmp dh,KnifeWaitTimeInFunc
-jne kskipsp3
+jne kskipchatsp3
 ret
-kskipsp3:
+kskipchatsp3:
 
 call drawP1Holstered
 call drawP2Holstered
@@ -4776,12 +4751,12 @@ knextCompare3:
 
 cmp bx,2
 
-jne kskipComp3
+jne kskipchatComp3
 
 call foulP1		;lw 7d 3amal foul n2ool
 jmp startRound ;restart the game
 
-kskipComp3:
+kskipchatComp3:
 
 mov ax,0
 mov ah,1h
@@ -4791,13 +4766,13 @@ jz kcheck3
 
 add di,0
 cmp ah, 50h
-jnz kskip3
+jnz kskipchat3
 inc p2KnifeCount
 ; mov ah,9
 ; lea dx,P1HasSheildPrompt
 ; int 21h
 jmp kl
-kskip3:add si,2
+kskipchat3:add si,2
 cmp al,73h
 jnz kclr1
 inc p1KnifeCount
@@ -4835,9 +4810,9 @@ mov ah,2ch
 int 21h
 SUB dh,currSysTime
 cmp dh,KnifeWaitTimeInFunc
-jne kskipsp4
+jne kskipchatsp4
 ret
-kskipsp4:
+kskipchatsp4:
 
 call drawP1Holstered
 call drawP2Holstered
@@ -4854,12 +4829,12 @@ knextCompare4:
 
 cmp bx,2
 
-jne kskipComp4
+jne kskipchatComp4
 
 call foulP1		;lw 7d 3amal foul n2ool
 jmp startRound ;restart the game
 
-kskipComp4:
+kskipchatComp4:
 
 mov ax,0
 mov ah,1h
@@ -4869,13 +4844,13 @@ jz kcheck4
 
 add di,0
 cmp ah, 4Dh
-jnz kskip4
+jnz kskipchat4
 inc p2KnifeCount
 ; mov ah,9
 ; lea dx,P1HasSheildPrompt
 ; int 21h
 jmp kl
-kskip4:add si,3
+kskipchat4:add si,3
 cmp al,64h
 jnz kclr4
 inc p1KnifeCount
@@ -4944,8 +4919,6 @@ p1Knivescount proc
         int 10h
         ret
 p1Knivescount endp
-
-
 p2Knivescount proc
 
         mov si,@data;moves to si the location in memory of the data segment
@@ -4962,11 +4935,314 @@ p2Knivescount proc
         ret
 p2Knivescount endp
 
-f1: call foulP1		;lw 7d 3amal foul n2ool
-jmp startRound ;restart the game
+;------------Chatting--------------
+MovePlayersUp proc
+        ;---- Clear Players ---;
+        mov clearimage,1
+        call drawP1Holstered
+        call drawP2Holstered
+        mov clearimage,0
+        ;----------------------;
+        ;---- Move Players ----;
+        mov bx,Yposition
+        mov tempYposition,bx
+        mov bx,chatYposition
+        mov Yposition,bx
+        call drawP1Holstered
+        call drawP2Holstered
+        ;----------------------;
+        call DrawChatLine
+        call ChatTitle
+        ret
+MovePlayersUp endp
 
-f2:
-foulon2: call foulP2
-jmp startRound
+DrawChatLine proc
+
+        MOV AH,0Bh   	;set the configuration
+	mov cx,0  ;Column
+        mov dx,chatYposition       ;Row
+        ADD dx,imgH
+        add dx,2       
+        mov al,03h        ;Pixel color
+        mov ah,0ch       ;Draw Pixel Command
+        horizontaline:int 10h
+        inc cx
+        cmp cx,640
+        JNZ horizontaline
+        ;Draw Vertical Line
+        MOV AH,0Bh   	;set the configuration
+	mov cx,320  ;Column
+        mov dx,chatYposition       ;Row
+        ADD dx,imgH
+        add dx,2       
+        mov al,03h        ;Pixel color
+        mov ah,0ch       ;Draw Pixel Command
+        verticalline:int 10h
+        inc dx
+        cmp dx,400
+        JNZ verticalline
+        ret
+DrawChatLine endp
+ClearChatLine proc
+        MOV AH,0Bh   	;set the configuration
+	mov cx,0  ;Column
+        mov dx,chatYposition       ;Row
+        ADD dx,imgH
+        add dx,2       
+        mov al,bgrndcolor        ;Pixel color
+        mov ah,0ch       ;Draw Pixel Command
+        chorizontaline:int 10h
+        inc cx
+        cmp cx,640
+        JNZ chorizontaline
+        ;Draw Vertical Line
+        MOV AH,0Bh   	;set the configuration
+	mov cx,320  ;Column
+        mov dx,chatYposition       ;Row
+        ADD dx,imgH
+        add dx,2       
+        mov al,bgrndcolor        ;Pixel color
+        mov ah,0ch       ;Draw Pixel Command
+        cverticalline:int 10h
+        inc dx
+        cmp dx,400
+        JNZ cverticalline
+        ret
+ClearChatLine endp
+;-----------Display Chat state  -----
+ChatTitle    PROC
+        mov si,@data;moves to si the location in memory of the data segment
+        mov es,si;moves to es the location in memory of the data segment
+        mov ah,13h;service to print string in graphic mode
+        mov al,0;sub-service 0 all the characters will be in the same color(bl)
+        mov bh,0;page number=always zero
+        mov bl,00001011b;(foreground and background)
+        ;     0000             1111
+        ;|_ Background _| |_ Foreground _|
+        mov cx,10;length of string
+        mov dl, 36  ;Column
+        mov dh, 16  ;Row
+        mov bp,offset chattitlemes;mov bp the offset of the string
+        int 10h
+        RET
+ChatTitle endp
+;-----------Clear Chat state  -----
+ClearChatTitle    PROC
+        mov si,@data;moves to si the location in memory of the data segment
+        mov es,si;moves to es the location in memory of the data segment
+        mov ah,13h;service to print string in graphic mode
+        mov al,0;sub-service 0 all the characters will be in the same color(bl)
+        mov bh,0;page number=always zero
+        mov bl,bgrndcolor
+        mov cx,10;length of string
+        mov dl, 36  ;Column
+        mov dh, 19  ;Row
+        mov bp,offset chattitlemes;mov bp the offset of the string
+        int 10h
+        RET
+ClearChatTitle endp
+MovePlayersDwon proc
+        ;---- Clear Players ---;
+        mov clearimage,1
+        call drawP1Holstered
+        call drawP2Holstered
+        mov clearimage,0
+        ;----------------------;
+        Call ClearChatLine
+        Call ClearChatTitle
+        ;---- Move Players ----;
+        mov bx,tempYposition
+        mov Yposition,bx
+        call drawP1Holstered
+        call drawP2Holstered
+        ;----------------------;
+        ret
+MovePlayersDwon endp
+
+ChatStart proc
+;----------------------------------Draw bold line------------------------------------------------------		
+Call MovePlayersUp
+;---------------------------------------------------------------------------
+mov ah,2       ;move cursor to x ,y position
+mov bh,0
+mov dx,1100h  ; Making cursor in position (0,0)        
+int 10h
+mov ah,09     ;writing name1 as  player 1 
+mov dx,offset name1 
+int 21h
+;------------------------------------------------------------------------------
+mov ah,2             		    ;move cursor to x,y
+mov bh,0
+mov dx,1129h         		    ; make cursor in this position
+int 10h
+		
+mov ah,09
+mov dx,offset name2 
+int 21h              ;display name2
+;----------------------------------------------------------------------------------
+                        ; momken nl3^eha
+mov ah,2             		    ;move cursor to x,y
+mov bh,0
+mov dx,1800h         		    ;At end of screen
+int 10h
+		
+mov ah,09
+mov dx,offset ToExit
+;int 21h
+
+;---------------------------------------------------------------------------
+Mov Cursorme,1200h   ;begining of player 1 curser
+Mov Cursorofother,1229h   ;begining of player 2 curser
+;-----------------------sending-------------------------------------
+Back12:mov ah,1					;get key pressed without waiting and it's loop until user press escape
+int 16h	
+jz hup;if no key pressed jump to hupchat without waiting input else go to next line
+cmp al,27  ;check if the key pressed is esc
+jz escapenow  ;if key was esc then get out of chat mode
+;--------check for pressing enter--------------------
+cmp al,0dh
+jne skipchat87
+mov ah,2                 ;move cursor at player1 pos
+mov bh,0
+mov dx,Cursorme             ;a5er el screen
+inc dh
+mov dl,0h
+mov Cursorme,dx
+int 10h
+skipchat87:
+;----------------------------------------------------------------------------
+mov sendingbyte,al  ;send entered character to var sendingbyte
+;-----
+mov al,0  ; just clearing buffer and moving value of al to ah
+mov ah,0CH
+int 21h 	
+;-----------serial port to send character---------------------
+mov dx , 3FDH		  ; Line Status Register
+AGAIN22:  	
+In al , dx 			  ;Read Line Status
+AND al , 00100000b
+JZ AGAIN22
+mov dx , 3F8H		  ; Transmit data register
+mov  al,sendingbyte   ;moving value of sendingbyte to al to send
+out dx , al 		
+
+mov ah,2              ;move cursor at player1 pos
+mov bh,0
+mov dx,Cursorme             
+int 10h
+;---------display the character get from first player--------
+mov ah,2
+mov dl,sendingbyte
+int 21h
+;---------------
+mov ah,3      ;Get curser position and make me able to go to next byte
+mov bh,0
+int 10h
+;----------------------
+mov Cursorme,dx  
+mov dx,Cursorme  ;??
+cmp dl,25h ;because that's barrier between player1 and player 2
+JnE DonotMakeNewLine		
+mov ah,2                 ;move cursor at player1 pos
+mov bh,0
+mov dx,Cursorme             
+inc dh
+mov dl,0h
+mov Cursorme,dx
+int 10h	
+DonotMakeNewLine:
+;----------------- Check for scroll up -----------
+mov ah,3      ;Get curser position and make me able to go to next byte
+mov bh,0
+int 10h
+;-------
+mov Cursorme,dx  
+mov dx,Cursorme  ;??
+cmp dh,18h               ;End of area
+jne Donotshiftmore		
+mov ah,6       
+mov al,1        ; scroll by 1 line    
+mov bh,0       ; normal video attribute         
+mov ch,12h      ; upper left Y
+mov cl,0h        ; upper left X
+mov dh,18h     ; lower right Y
+mov dl,25h      ; lower right X 
+int 10h 		
+mov dx,Cursorme
+mov dh,17h
+mov Cursorme,dx
+Donotshiftmore:
+hup:
+;----------recieve a char----------------------------------------------------------------
+mov dx , 3FDH		; Line Status Register
+in al , dx 
+AND al , 1
+jz skip		
+mov dx , 03F8H
+in al , dx 
+mov sendingbyte , al		
+mov ah,2                 ;move cursor at player2 pos
+mov bh,0
+mov dx,Cursorofother             
+int 10h
+cmp sendingbyte,27 ; if esc key was pressed
+jz escapenow
+;--------check for pressing enter--------------------
+cmp al,0dh
+jne skipchat33
+mov ah,2                 ;move cursor at player2 pos
+mov bh,0
+mov dx,Cursorofother             
+inc dh
+mov dl,29h               ;Why not working???????????
+mov Cursorofother,dx 
+int 10h 		
+skipchat33:
+;-----------------------------Display-----------------------------------------------		
+mov ah,2
+mov dl,sendingbyte
+int 21h
+;--------------------------------------------------------------------------
+mov ah,3        ;get curser position
+mov bh,0
+int 10h
+mov Cursorofother,dx
+mov dx,Cursorofother
+cmp dl,49h
+jne DonotMakeNewLine2		
+mov ah,2                 ;move cursor at player1 pos
+mov bh,0
+mov dx,Cursorofother             
+inc dh
+mov dl,29h
+mov Cursorofother,dx 
+int 10h 		
+DonotMakeNewLine2:
+;-------------- Scrolling-------------
+mov ah,3        
+mov bh,0
+int 10h
+mov Cursorofother,dx
+mov dx,Cursorofother
+cmp dh,22
+jne Donotshiftmore112		
+mov ah,6       
+mov al,1        ; scroll by 1 line    
+mov bh,0       ; normal video attribute         
+mov ch,12h      ; upper left Y
+mov cl,29h        ; upper left X
+mov dh,22     ; lower right Y
+mov dl,79      ; lower right X 
+int 10h 		
+mov dx,Cursorofother
+mov dh,21
+mov Cursorofother,dx
+Donotshiftmore112:
+skip:
+jmp Back12
+escapenow:
+        call MovePlayersDwon
+        ret
+ChatStart endp
 
 end main
