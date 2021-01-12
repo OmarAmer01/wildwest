@@ -2304,22 +2304,27 @@ mov myMouse,bl
 
 cmp hisMouse,1                ;IF PLAYER 2 READY BUT 1 NOT READY
 ;je twoReady
-jne readyCheck
+jne skipcmp
+jne twoReady
 cmp myMouse,0
 je twoReady
 
+skipcmp:
+
 cmp myMouse,0
-jne readyCheck
+jne plsSkp
 cmp hisMouse,0
 je readyCheck
 
+plsSkp:
 
 cmp myMouse,1
-jne oneReady
+jne nopls
 cmp hisMouse,1
 je breakloop
 jne oneReady
 
+nopls:
 ;cmp bx,0                ; IF NO ONE IS READY
 ;je readyCheck
 
@@ -2359,15 +2364,29 @@ mov myMouse,bl
 ;je oneReady
 
 cmp myMouse,1
+jne stopthis
+cmp hisMouse,0
+je oneReady
 
+stopthis:
 
-
-cmp bx,0                ; no one ready
+cmp myMouse,0
+jne nooo
+cmp hisMouse,0
 je readyCheck
 
-cmp bx,3
-je breakloop            ; all ready
-jne twoReady
+nooo:
+;cmp bx,0                ; no one ready
+;je readyCheck
+
+cmp myMouse,1
+jne readyCheck
+cmp hisMouse,1
+jne readyCheck
+je breakloop
+;cmp bx,3
+;je breakloop            ; all ready
+;jne twoReady
 
 breakloop:
 
