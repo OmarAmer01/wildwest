@@ -35,6 +35,7 @@ gotInvitedToChat db 0
 
 myMouse db 0
 hisMouse db 0 ; separate variable so my head doesnt explode
+isSlave db 1
 
 Pshield db 'Shield','$'
 ;-----------------------
@@ -1751,6 +1752,7 @@ inviteChecker:
                 jne checkKeyBoard
 
 haveINV:
+call cursorToMiddle
 mov ah,9
 lea dx,InviteREC
 int 21h
@@ -1800,6 +1802,7 @@ goPlay:
 mov ah,9
 mov dx, offset inviteSent
 int 21h
+mov isSlave,0
 
 		mov dx , 3FDH		; Line Status Register
 AGAINaaa:  	In al , dx 			;Read Line Status
@@ -2183,7 +2186,7 @@ startTheGame:
 startRound: ; makes the players start another round of wildwest
             ; b3d ma nsamy, bn3ml shwayet initializations keda 
 
-
+call Statusbar
 
 
 call clrp1shield
@@ -2371,6 +2374,14 @@ je oneReady
 stopthis:
 
 cmp myMouse,0
+jne cacnel
+cmp hisMouse,1
+je twoReady
+
+cacnel:
+
+
+cmp myMouse,0
 jne nooo
 cmp hisMouse,0
 je readyCheck
@@ -2449,16 +2460,43 @@ call drawP1Holstered
 call drawP2Holstered
 
 mov ax,3
-int 33h 		; get mouse button status
+int 33h             ; Get Mouse Status -> Gets put in BX
 
-cmp bx,1
+xchg ax,bx
+push ax
+;------ we now get to know the btn status of the other player via serial yarbbb
+call waitUntillCTS
+                mov dx , 3F8H		; Transmit data register
+  		pop ax
+  		out dx , al 
+call waitUntillCTR
+                mov dx , 03F8H
+  		in al , dx 
+  		xchg ax,bx
+mov hisMouse,bl
+;------- we now store the mouse data of this player
+mov ax,3
+int 33h
+mov myMouse,bl		; get mouse button status
+
+;cmp bx,1                ; if p1 is pressed but 2 is not
+;jne nextCompare
+cmp myMouse,1
+jne stopthis2
+cmp hisMouse,1
 jne nextCompare
-call foulP2		;lw 7d 3amal foul n2ool
+je skipAllFouls
+stopthis2:
+
+
+
+call foulP1		;lw 7d 3amal foul n2ool
 jmp startRound  ;restart the game
 
 nextCompare:
-
-cmp bx,2
+ call foulP2
+ jmp startRound
+;cmp bx,2
 
 jne skipComp
 
@@ -2471,6 +2509,8 @@ jne skipthisPlease
 jmp startRound
 
 skipthisPlease:
+
+skipAllFouls:
 
 mov ah,2ch
 int 21h    	; nbos 3la el sa3a
