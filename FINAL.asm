@@ -165,6 +165,7 @@ bgrndcolor db 0           ;Set background color for images
 
 clearimage DB 0   
 chattitlemes DB ' Chatting ','$'
+spaces DB '      ','$'
 
 ;--------------------------------- Player One --------------------------------------------
 p1Raised DB 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 
@@ -4121,9 +4122,9 @@ Statusbar    PROC
         mov al,0;sub-service 0 all the characters will be in the same color(bl)
         mov bh,0;page number=always zero
         ;Call GameTitle
-                Call PlayerTwoName
+        Call PlayerTwoName
         Call PlayerOneName
-
+        Call ClearBeforePlayerOneName
        ; Call PlayerOneScore
         ;Call PlayerTwoScore
         ;Call PlayerOneStatusBarSheild
@@ -4166,6 +4167,17 @@ PlayerOneName    PROC
         int 10h
         RET
 PlayerOneName endp
+ClearBeforePlayerOneName    PROC
+        mov bl,bgrndcolor;color of the text (white foreground and black background)
+        ;     0000             1111
+        ;|_ Background _| |_ Foreground _|
+        mov cl,5;length of string
+        mov dl, 0  ;Column
+        mov dh, 2  ;Row
+        mov bp,offset spaces;mov bp the offset of the string
+        int 10h
+        RET
+ClearBeforePlayerOneName endp
 ;-----------Display Player Two Name  -----
 PlayerTwoName    PROC
       
