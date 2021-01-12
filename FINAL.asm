@@ -1673,7 +1673,7 @@ CHK:	mov dx , 3FDH		; Line Status Register
 
 mov si,2
 ExchangeNames: ;---------- el ta3arof y3ny hahahahahah
-	mov cx,15	
+	mov cx,16	
 AGAIN2:        call waitUntillCTS ;  mov dx , 3FDH		; Line Status Register
         	;In al , dx 			;Read Line Status
   		;;AND al , 00100000b
@@ -2447,6 +2447,8 @@ mov knifeWaitTime,ah ;time until knife prompt may be called
 add ah,2
 mov knifeWaitTimeInFunc,ah
 
+
+
 mov ah,2ch
 int 21h
 mov al,dh
@@ -2454,6 +2456,76 @@ mov ah,0
 mov bl,2
 div bl
 mov knifePerc,ah ;50% chance for knife to happen each round
+
+cmp isSlave,1
+jne skipSending
+call waitUntillCTS
+mov dx , 3F8H		; Transmit data register
+  		mov  al,waitTime
+  		out dx , al 
+                
+                call waitUntillCTS
+                mov dx , 3F8H
+mov  al,ShieldWaitTime
+  		        out dx , al 
+call waitUntillCTS
+mov dx , 3F8H
+mov  al,ShieldWaitTimeInFunc
+  		out dx , al 
+                  call waitUntillCTS
+                  mov dx , 3F8H
+                  mov  al,knifeWaitTime
+  		out dx , al 
+                  call waitUntillCTS
+                  mov dx , 3F8H
+                      mov  al,knifeWaitTimeInFunc
+  		out dx , al 
+                    call waitUntillCTS
+                  mov dx , 3F8H
+                      mov  al,knifePerc
+  		out dx , al 
+
+                                  call waitUntillCTS
+                mov dx , 3F8H
+mov  al,currSysTime
+  		        out dx , al 
+
+skipSending:
+cmp isSlave,1
+jne foulCheck
+call waitUntillCTR
+mov dx , 03F8H
+  		in al , dx 
+  		mov waitTime , al
+                  call waitUntillCTR
+                  mov dx , 03F8H
+  		in al , dx 
+  		mov ShieldWaitTime , al
+                  call waitUntillCTR
+                  mov dx , 03F8H
+  		in al , dx 
+  		mov ShieldWaitTimeInFunc , al
+
+                       call waitUntillCTR
+                  mov dx , 03F8H
+  		in al , dx 
+  		mov knifeWaitTime , al
+                       call waitUntillCTR
+                  mov dx , 03F8H
+  		in al , dx 
+  		mov knifeWaitTimeInFunc , al
+                           call waitUntillCTR
+                  mov dx , 03F8H
+  		in al , dx 
+  		mov knifePerc , al
+                 call waitUntillCTR
+                  mov dx , 03F8H
+  		in al , dx 
+  		mov currSysTime , al
+
+
+
+
 
 foulCheck:
 call drawP1Holstered
