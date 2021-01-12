@@ -2521,7 +2521,7 @@ mov dx , 03F8H
                  call waitUntillCTR
                   mov dx , 03F8H
   		in al , dx 
-  		mov currSysTime , al
+  		mov knifePerc , al
 
 
 
@@ -3509,22 +3509,45 @@ skipsp1:
 call drawP1Holstered
 call drawP2Holstered
 
+
 mov ax,3
-int 33h 		; get mouse button status
+int 33h             ; Get Mouse Status -> Gets put in BX
 
-cmp bx,1
-jne nextCompare1
-call foulP2		;lw 7d 3amal foul n2ool
-jmp startRound  ;restart the game
+xchg ax,bx
+push ax
+;------ we now get to know the btn status of the other player via serial yarbbb
+call waitUntillCTS
+                mov dx , 3F8H		; Transmit data register
+  		pop ax
+  		out dx , al 
+call waitUntillCTR
+                mov dx , 03F8H
+  		in al , dx 
+  		xchg ax,bx
+mov hisMouse,bl
+;------- we now store the mouse data of this player
+mov ax,3
+int 33h
+mov myMouse,bl		; get mouse button status		; get mouse button status
 
-nextCompare1:
+cmp myMouse,1
+jne f1
+cmp hisMouse,1
+jne f2
+je SkipComp1
+		;lw 7d 3amal foul n2ool
+  
 
-cmp bx,2
+;nextCompare1:
 
-jne skipComp1
+;cmp bx,2
+cmp myMouse,0
+je f1
+cmp hisMouse,1
+jne foulOn2
 
-call foulP1		;lw 7d 3amal foul n2ool
-jmp startRound ;restart the game
+;f1: call foulP1		;lw 7d 3amal foul n2ool
+;jmp startRound ;restart the game
 
 skipComp1:
 
@@ -3585,21 +3608,29 @@ call drawP1Holstered
 call drawP2Holstered
 
 mov ax,3
-int 33h 		; get mouse button status
+int 33h
+mov myMouse,bl		; get mouse button status		; get mouse button status
 
-cmp bx,1
-jne nextCompare2
-call foulP2		;lw 7d 3amal foul n2ool
-jmp startRound  ;restart the game
+cmp myMouse,1
+jne f1
+cmp hisMouse,1
+jne f2
+je SkipComp2
+		;lw 7d 3amal foul n2ool
+  
 
-nextCompare2:
+;nextCompare1:
 
-cmp bx,2
+;cmp bx,2
+cmp myMouse,0
+je f1
+cmp hisMouse,1
+jne foulOn2
 
-jne skipComp2
-
-call foulP1		;lw 7d 3amal foul n2ool
+f11: call foulP1		;lw 7d 3amal foul n2ool
 jmp startRound ;restart the game
+
+
 
 skipComp2:
 
@@ -3664,21 +3695,29 @@ call drawP1Holstered
 call drawP2Holstered
 
 mov ax,3
-int 33h 		; get mouse button status
+int 33h
+mov myMouse,bl		; get mouse button status		; get mouse button status
 
-cmp bx,1
-jne nextCompare3
-call foulP2		;lw 7d 3amal foul n2ool
-jmp startRound  ;restart the game
+cmp myMouse,1
+jne f1
+cmp hisMouse,1
+jne f2
+je SkipComp3
+		;lw 7d 3amal foul n2ool
+  
 
-nextCompare3:
+;nextCompare1:
 
-cmp bx,2
+;cmp bx,2
+cmp myMouse,0
+je f21
+cmp hisMouse,1
+jne foulOn2
 
-jne skipComp3
-
-call foulP1		;lw 7d 3amal foul n2ool
+f21: call foulP1		;lw 7d 3amal foul n2ool
 jmp startRound ;restart the game
+
+
 
 skipComp3:
 
@@ -3742,21 +3781,28 @@ call drawP1Holstered
 call drawP2Holstered
 
 mov ax,3
-int 33h 		; get mouse button status
+int 33h
+mov myMouse,bl		; get mouse button status		; get mouse button status
 
-cmp bx,1
-jne nextCompare4
-call foulP2		;lw 7d 3amal foul n2ool
-jmp startRound  ;restart the game
+cmp myMouse,1
+jne f1
+cmp hisMouse,1
+jne f2
+je SkipComp4
+		;lw 7d 3amal foul n2ool
+  
 
-nextCompare4:
+;nextCompare1:
 
-cmp bx,2
+;cmp bx,2
+cmp myMouse,0
+je f1
+cmp hisMouse,1
+jne foulOn2
 
-jne skipComp4
 
-call foulP1		;lw 7d 3amal foul n2ool
-jmp startRound ;restart the game
+
+
 
 skipComp4:
 
@@ -4916,6 +4962,11 @@ p2Knivescount proc
         ret
 p2Knivescount endp
 
+f1: call foulP1		;lw 7d 3amal foul n2ool
+jmp startRound ;restart the game
 
+f2:
+foulon2: call foulP2
+jmp startRound
 
 end main
