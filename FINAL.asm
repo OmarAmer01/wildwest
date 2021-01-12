@@ -32,6 +32,10 @@ Pscorenum2 db 47,'$'
 gotInvitedToGame db 0
 gotInvitedToChat db 0
 
+
+myMouse db 0
+hisMouse db 0 ; separate variable so my head doesnt explode
+
 Pshield db 'Shield','$'
 ;-----------------------
 newLine db 13,10 , '$' 
@@ -66,8 +70,11 @@ P2HasSheild db 0d
 ShieldWaitTime db ?
 ShieldWaitTimeInFunc db ?
 
-InviteREC db "Invite recieved press a to play $"
-inviteSent db "Invite Sent Please Wait $"
+InviteREC db "Invite recieved press F1 to CHAT $"
+InviteRECchat db "Invite recieved press F2 to PLAY $"
+inviteSent db "GAME Invite Sent Please Wait $"
+
+inviteSentChat db "CHAT Invite Sent Please Wait $"
 
 menu db 10,13, "Menu: "   ;menu bar 
      db 10,13, "A.Game Mode "
@@ -1754,11 +1761,12 @@ jmp inviteChecker
 
 haveChatInvRecieved:
 mov gotInvitedToChat,1
-
+jmp dispINV
 
 haveGameInvRecieced:
 mov gotInvitedToGame,1
 
+dispINV:
 mov ah,9
 lea dx,InviteREC
 int 21h
@@ -1815,8 +1823,8 @@ AGAINaaa:  	In al , dx 			;Read Line Status
 
 
 goChat:
-mov ah,2
-mov dx,'C'
+mov ah,9
+mov dx, offset inviteSentChat
 int 21h
 
 		mov dx , 3FDH		; Line Status Register
@@ -1828,7 +1836,18 @@ AGAINaa:  	In al , dx 			;Read Line Status
   		mov dx , 3F8H		; Transmit data register
   		mov  al,3bh
   		out dx , al 
-                
+
+                  ;now we take serial input n4of el tanny 3ayz yl3b wla l2		
+	mov dx , 3FDH		; Line Status Register
+	CHKxxax:	in al , dx 
+  		AND al , 1
+  		JZ CHKxxax
+
+                mov dx , 03F8H
+  		in al , dx 
+  	cmp al,3bh
+          je startTheGame ; <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< CHANGE THIS ONE TO START CHAT INSHALLAH WILL WORK
+        jne inviteChecker
 
 ;roo7 l inviteChecker
 
@@ -2030,7 +2049,8 @@ pusha
 readyCheck:         ; loop to make sure players have their guns
                     ; holesterd at the start of the round 
 
-
+mov myMouse,0
+mov hisMouse,0
 call drawP1Raised
 call drawP2Raised     
 ;------------------------ l7ad hena el game mashya tamam
@@ -2039,39 +2059,91 @@ mov ax,3
 int 33h             ; Get Mouse Status -> Gets put in BX
 
 xchg ax,bx
-;------ we now get to know the btn status of the other player
-	mov dx , 3FDH		; Line Status Register
-	CHKas:	in al , dx 
-  		AND al , 1
-  		JZ CHKas
+push ax
+;------ we now get to know the btn status of the other player via serial yarbbb
+call waitUntillCTS
+                mov dx , 3F8H		; Transmit data register
+  		pop ax
+  		out dx , al 
+call waitUntillCTR
+                mov dx , 03F8H
+  		in al , dx 
+  		xchg ax,bx
+mov hisMouse,bl
+;------- we now store the mouse data of this player
+mov ax,3
+int 33h
+mov myMouse,bl
 
-
-
-cmp bx,1            ; if LMB Pressed, then p1 is ready but p2 isnt
+cmp myMouse,1            ; if LMB Pressed, then p1 is ready but p2 isnt
 je oneReady
-cmp bx,2            ; if RMB Pressed, then p2 is ready but p1 isnt
+cmp hisMouse,1            ; if RMB Pressed, then p2 is ready but p1 isnt
 je twoReady
-cmp bx,3            ; if both RMB & LMB are down then both players are ready
-je breakloop
-jne readyCheck      ; if no buttons were pressed, repeat the ready check
 
+;---- if the myMouse and HisMouse = 1
+cmp myMouse,1
+jne readyCheck
+cmp hisMouse,1
+je breakloop
+jne readyCheck
+
+;cmp bx,3            ; if both RMB & LMB are down then both players are ready
+;je breakloop
+;jne readyCheck      ; if no buttons were pressed, repeat the ready check
+
+mov ax,3
+int 33h
+mov myMouse,bl ; take my mouse data and put in bl
 
 oneReady:
 
 call drawP1Holstered
-                        ;GET MOUSE STATUS
+
+mov ax,3
+int 33h             ; Get Mouse Status -> Gets put in BX
+
+xchg ax,bx
+push ax
+;------ we now get to know the btn status of the other player via serial yarbbb
+call waitUntillCTS
+                mov dx , 3F8H		; Transmit data register
+  		pop ax
+  		out dx , al 
+call waitUntillCTR
+                mov dx , 03F8H
+  		in al , dx 
+  		xchg ax,bx
+mov hisMouse,bl
+;------- we now store the mouse data of this player
 mov ax,3
 int 33h
+mov myMouse,bl
 
-cmp bx,2                ;IF PLAYER 2 READY BUT 1 NOT READY
+
+cmp hisMouse,1                ;IF PLAYER 2 READY BUT 1 NOT READY
+;je twoReady
+jne readyCheck
+cmp myMouse,0
 je twoReady
 
-cmp bx,0                ; IF NO ONE IS READY
+cmp myMouse,0
+jne readyCheck
+cmp hisMouse,0
 je readyCheck
 
-cmp bx,3                ; IF BOTH BUTTONS PRESSED
-je breakloop                ; START THE ROUND
+
+cmp myMouse,1
 jne oneReady
+cmp hisMouse,1
+je breakloop
+jne oneReady
+
+;cmp bx,0                ; IF NO ONE IS READY
+;je readyCheck
+
+;cmp bx,3                ; IF BOTH BUTTONS PRESSED
+;je breakloop                ; START THE ROUND
+;jne oneReady
 
 
 
@@ -2081,16 +2153,38 @@ twoReady:               ; JUST LIKE oneReady
 call drawP2Holstered
 
 mov ax,3
+int 33h             ; Get Mouse Status -> Gets put in BX
+
+xchg ax,bx
+push ax
+;------ we now get to know the btn status of the other player via serial yarbbb
+call waitUntillCTS
+                mov dx , 3F8H		; Transmit data register
+  		pop ax
+  		out dx , al 
+call waitUntillCTR
+                mov dx , 03F8H
+  		in al , dx 
+  		xchg ax,bx
+mov hisMouse,bl
+;------- we now store the mouse data of this player
+mov ax,3
 int 33h
+mov myMouse,bl
 
-cmp bx,1
-je oneReady
 
-cmp bx,0
+;cmp bx,1               ;p1 ready but 2 not
+;je oneReady
+
+cmp myMouse,1
+
+
+
+cmp bx,0                ; no one ready
 je readyCheck
 
 cmp bx,3
-je breakloop
+je breakloop            ; all ready
 jne twoReady
 
 breakloop:
@@ -2535,9 +2629,9 @@ mov al,10000000b		;Set Divisor Latch Access Bit
 out dx,al			;Out it
 
 mov dx,3f8h			
-mov al,0ch			
+mov al,01h			
 out dx,al
-                ;Set Baud Rate to 9600
+                ;Set Baud Rate to max 
 mov dx,3f9h
 mov al,0h
 out dx,al
