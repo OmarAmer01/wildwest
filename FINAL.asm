@@ -2245,10 +2245,11 @@ call drawP2Raised
 ;------------------------ l7ad hena el game mashya tamam
 
 ;------- Internal Chat
-;--------------------Get Chat Mode by pressing on (b)------------------------------------------------------------------------
-mov ah,0  ;get key pressed from user
-int 16h
-cmp AL,98
+;--------------------Get Chat Mode by pressing on (c)------------------------------------------------------------------------
+mov ah,1	;get key pressed without waiting 
+int 16h	
+jz skipchatchat         ;if no key pressed jump to skipchat without waiting input else go to next line
+cmp AL,99
 jne skipchatchat
 Call ChatStart
 skipchatchat:
@@ -5026,38 +5027,8 @@ ChatTitle    PROC
         int 10h
         RET
 ChatTitle endp
-;-----------Clear Chat state  -----
-ClearChatTitle    PROC
-        mov si,@data;moves to si the location in memory of the data segment
-        mov es,si;moves to es the location in memory of the data segment
-        mov ah,13h;service to print string in graphic mode
-        mov al,0;sub-service 0 all the characters will be in the same color(bl)
-        mov bh,0;page number=always zero
-        mov bl,bgrndcolor
-        mov cx,10;length of string
-        mov dl, 36  ;Column
-        mov dh, 19  ;Row
-        mov bp,offset chattitlemes;mov bp the offset of the string
-        int 10h
-        RET
-ClearChatTitle endp
-MovePlayersDwon proc
-        ;---- Clear Players ---;
-        mov clearimage,1
-        call drawP1Holstered
-        call drawP2Holstered
-        mov clearimage,0
-        ;----------------------;
-        Call ClearChatLine
-        Call ClearChatTitle
-        ;---- Move Players ----;
-        mov bx,tempYposition
-        mov Yposition,bx
-        call drawP1Holstered
-        call drawP2Holstered
-        ;----------------------;
-        ret
-MovePlayersDwon endp
+
+
 
 ChatStart proc
 ;----------------------------------Draw bold line------------------------------------------------------		
@@ -5088,13 +5059,13 @@ int 10h
 		
 mov ah,09
 mov dx,offset ToExit
-;int 21h
+int 21h
 
 ;---------------------------------------------------------------------------
 Mov Cursorme,1200h   ;begining of player 1 curser
 Mov Cursorofother,1229h   ;begining of player 2 curser
 ;-----------------------sending-------------------------------------
-Back12:mov ah,1					;get key pressed without waiting and it's loop until user press escape
+Back12:mov ah,1			;get key pressed without waiting and it's loop until user press escape
 int 16h	
 jz hup;if no key pressed jump to hupchat without waiting input else go to next line
 cmp al,27  ;check if the key pressed is esc
@@ -5244,5 +5215,59 @@ escapenow:
         call MovePlayersDwon
         ret
 ChatStart endp
+
+MovePlayersDwon proc
+        ;---- Clear Players ---;
+        mov clearimage,1
+        call drawP1Holstered
+        call drawP2Holstered
+        mov clearimage,0
+        ;----------------------;
+        Call ClearChatLine
+        Call ClearChatTitle
+        ;Call ClearChatScreen 
+        ;open video mode again 
+        mov ax, 4F02h 
+	mov bx, 0100h	
+	INT 10h      	;To Graphics Mode
+        call Statusbar
+        Call GameReadyStatement 	;Telling players to get ready
+        call PlayerOneScore
+        Call PlayerTwoScore
+        call p1Knives
+        call p2Knives
+        call p1Knivescount
+        call p2Knivescount
+        ;---- Move Players ----;
+        mov bx,tempYposition
+        mov Yposition,bx
+        call drawP1Holstered
+        call drawP2Holstered
+        ;----------------------;
+        ret
+MovePlayersDwon endp
+;-----------Clear Chat state  -----
+ClearChatTitle    PROC
+        mov si,@data;moves to si the location in memory of the data segment
+        mov es,si;moves to es the location in memory of the data segment
+        mov ah,13h;service to print string in graphic mode
+        mov al,0;sub-service 0 all the characters will be in the same color(bl)
+        mov bh,0;page number=always zero
+        mov bl,bgrndcolor
+        mov cx,10;length of string
+        mov dl, 36  ;Column
+        mov dh, 16  ;Row
+        mov bp,offset chattitlemes;mov bp the offset of the string
+        int 10h
+        RET
+ClearChatTitle endp
+ClearChatScreen proc ; CLEAR SCREEN
+      mov ax,0600h
+      mov bh,07
+      mov cx,0000
+      mov dx,184Fh  ;to Row=18H col=4Fh (right bottom)
+      int 10H
+      RET
+ClearChatScreen endp
 
 end main
