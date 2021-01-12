@@ -1700,6 +1700,9 @@ inc si
 
 ;----------------------------------TAKING NAMES COMPLETED-----------------------------
 BackToMenu:
+mov ah,0
+mov al ,3h
+int 10h
 
 
 
