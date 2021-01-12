@@ -1931,9 +1931,9 @@ jz escapenow  ;if key was esc then get out of chat mode
 ;--------check for pressing enter--------------------
 cmp al,0dh
 jne skip888
-mov ah,2                 ;move cursor at player1 pos
+mov ah,2                 
 mov bh,0
-mov dx,Cursorme             ;a5er el screen
+mov dx,Cursorme             
 inc dh
 mov dl,0h
 mov Cursorme,dx
@@ -1942,15 +1942,15 @@ skip888:
 ;----------------------------------------------------------------------------
 mov sendingbyte,al  ;send entered character to var sendingbyte
 ;-----
-mov al,0  ; just clearing buffer and moving value of al to ah
+mov al,0            ; just clearing buffer and moving value of al to ah
 mov ah,0CH
 int 21h 	
 ;-----------serial port to send character---------------------
 mov dx , 3FDH		  ; Line Status Register
-AGAINNN:  	
+AGAINchatting:  	
 In al , dx 			  ;Read Line Status
 AND al , 00100000b
-JZ AGAINNN
+JZ AGAINchatting
 mov dx , 3F8H		  ; Transmit data register
 mov  al,sendingbyte   ;moving value of sendingbyte to al to send
 out dx , al 		
@@ -1968,18 +1968,18 @@ mov bh,0
 int 10h
 mov Cursorme,dx
 mov dx,Cursorme
-cmp dh,11 ;because that's barrier between player1 and player 2
+cmp dh,9 ;because that's barrier between player1 and player 2
 JnE DonotMakeanyscroll		
-mov ah,6       
+mov ah,6     
 mov al,1        ; Scroll by 1 line    
-mov bh,0       ; normal video attribute         
-mov ch,1       ; upper left Y
+mov bh,0        ; normal video attribute         
+mov ch,1        ; upper left Y
 mov cl,0        ; upper left X
-mov dh,11     ; lower right Y
-mov dl,79      ; lower right X 
+mov dh,9        ; lower right Y
+mov dl,79       ; lower right X 
 int 10h 		
 mov dx,Cursorme
-mov dh,10
+mov dh,8
 mov Cursorme,dx
 DonotMakeanyscroll:
 hup:
@@ -1987,7 +1987,7 @@ hup:
 mov dx , 3FDH		; Line Status Register
 in al , dx 
 AND al , 1
-jz skipping		
+jz skipchatting		
 mov dx , 03F8H
 in al , dx 
 mov sendingbyte , al		
@@ -2000,24 +2000,24 @@ jz escapenow
 ;--------check for pressing enter--------------------
 cmp al,0dh
 jne skip889
-mov ah,2                 ;move cursor at player1 pos
+mov ah,2                 
 mov bh,0
-mov dx,Cursorofother             ;a5er el screen
+mov dx,Cursorofother             
 inc dh
 mov dl,0h
 mov Cursorofother,dx
 int 10h
 skip889:
-;----------------------------------------------------------------------------		
+;-----------------------------------------------------------------------------
 mov ah,2
 mov dl,sendingbyte
 int 21h
-mov ah,3        ;get curser position
+mov ah,3        
 mov bh,0
 int 10h
 mov Cursorofother,dx
 mov dx,Cursorofother
-cmp dh,21
+cmp dh,22
 jne Donotshiftmore		
 mov ah,6       
 mov al,1        ; scroll by 1 line    
@@ -2031,9 +2031,9 @@ mov dx,Cursorofother
 mov dh,21
 mov Cursorofother,dx
 Donotshiftmore:
-skipping:
+skipchatting:
 jmp BACK
-escapenow: 
+escapenow:
 jmp BACKTOMENU
 
 
