@@ -10,6 +10,9 @@
 Gtitle db 'The Wild West : Start Shooting! ','$'
 readystatement db 'Hold both mouse buttons to start!','$'
 missedshot db 'Foul!','$'
+
+p1winner db 'P1 Won!','$'
+p2winner db 'P2 Won!','$'
 Pname1 db 16,?,30 dup ('$')
 p1NameLen dw 0,'$'
 Pname2 db 16,?,30 dup ('$')
@@ -1802,6 +1805,8 @@ startTheGame:
 
 startRound: ; makes the players start another round of wildwest
             ; b3d ma nsamy, bn3ml shwayet initializations keda 
+           
+
 
 
 
@@ -1824,6 +1829,7 @@ call p1Knives
 call p2Knives
 call p1Knivescount
 call p2Knivescount
+;call clrWIN
 
 cmp Pscorenum1,47
 jne skipthis
@@ -3564,7 +3570,13 @@ PlayerOneIncrementScore    PROC
         ADD Pscorenum1,1
         mov bp, offset Pscorenum1;mov bp the offset of the string
         int 10h
+
+cmp Pscorenum1,54
+je p1win
         RET
+        p1win : call p1Won
+        
+        ret
 PlayerOneIncrementScore endp
 
 
@@ -3586,7 +3598,14 @@ PlayerTwoIncrementScore    PROC
         ADD Pscorenum2,1
         mov bp, offset Pscorenum2;mov bp the offset of the string
         int 10h
+        
+        cmp Pscorenum2,54
+je p2win
         RET
+        p2win : call p2Won
+        
+        ret
+
 PlayerTwoIncrementScore endp
 
 PlayerOneStatusBarSheild    PROC
@@ -4565,4 +4584,52 @@ clrRdisp proc
         int 10h
         ret
 clrRdisp endp
+
+p1Won proc
+
+call Statusbar
+   mov bl,00001011b;(foreground and background)
+        ;     0000             1111
+        ;|_ Background _| |_ Foreground _|
+        mov cx,p1NameLen;length of string
+        mov dl, 35  ;Column
+        mov dh, 4  ;Row
+        mov bp,offset Pname1+2;mov bp the offset of the string
+        int 10h
+        checkplaes:
+mov ah,0
+int 16h
+cmp ah,1ch
+      jne   checkplaes
+mov Pscorenum1,48
+mov Pscorenum2,48
+        RET
+
+p1Won endp
+
+p2Won proc
+call Statusbar
+   mov bl,00001011b;(foreground and background)
+        ;     0000             1111
+        ;|_ Background _| |_ Foreground _|
+        mov cx,p2NameLen;length of string
+        mov dl, 35  ;Column
+        mov dh, 4  ;Row
+        mov bp,offset Pname2+2;mov bp the offset of the string
+        int 10h
+        
+        checkplaes2:
+mov ah,0
+int 16h
+cmp ah,1ch
+      jne   checkplaes2
+      mov Pscorenum1,48
+        mov Pscorenum2,48
+      RET
+p2Won endp
+
+
+
+
+
 end main
